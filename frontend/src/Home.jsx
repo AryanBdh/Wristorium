@@ -21,7 +21,7 @@ const Home = () => {
       <div className="border-b border-gray-800 bg-[#0F172A] py-7">
   <div className="p-4 max-w-7xl mx-auto">
     <h2 className="text-2xl font-semibold text-center text-white">Featured Items</h2>
-    <p className="text-[#d4af37] mt-2 text-center">Check out our latest collection!</p>
+    <p className="text-[#B1976B] mt-2 text-center">Check out our latest collection!</p>
 
     <Collections />
   </div>
