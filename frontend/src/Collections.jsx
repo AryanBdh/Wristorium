@@ -8,7 +8,7 @@ const Collections = () => {
   ]
 
   return (
-    <section className="py-5 container mx-auto">
+    <section className="w-full py-5 container mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {collections.map((collection, index) => (
           <div key={index} className="relative group overflow-hidden bg-[#0f1420] rounded-lg cursor-pointer">

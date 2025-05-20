@@ -43,7 +43,7 @@ const MobileMenu = () => {
     <div className="md:hidden">
       <button
         onClick={toggleMenu}
-        className="p-2 text-gray-300 hover:text-[#d4af37] transition"
+        className="mt-2 text-gray-300 hover:text-[#d4af37] transition"
         aria-label="Toggle menu"
       >
         <Menu className="h-5 w-5" />
