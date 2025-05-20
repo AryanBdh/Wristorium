@@ -1,15 +1,27 @@
-import bgimg from "./images/bgimg.png"
+import watch from "./images/watch1.png"
+import AOS from "aos";
+import "aos/dist/aos.css";
+import {useEffect } from "react";
 
 const Collections = () => {
+
+ useEffect(() => {
+    AOS.init({
+      duration: 500,
+      once: false,
+      mirror: false,
+    });
+  }, []);
+
   const collections = [
-    { name: "Men's Collection", image: bgimg },
-    { name: "Women's Collection", image: bgimg },
-    { name: "Smart Collection", image: bgimg },
+    { name: "Men's Collection", image: watch },
+    { name: "Women's Collection", image: watch },
+    { name: "Smart Collection", image: watch },
   ]
 
   return (
     <section className="w-full py-5 container mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div data-aos="fade-up" className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {collections.map((collection, index) => (
           <div key={index} className="relative group overflow-hidden bg-[#0f1420] rounded-lg cursor-pointer">
             <img

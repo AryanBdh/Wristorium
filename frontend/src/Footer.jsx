@@ -8,7 +8,7 @@ const Footer = () => {
           <div className=" grid grid-cols-1 md:grid-cols-4 gap-20 mb-12">
             <div>
               <Link to="/" className="text-xl font-bold text-white mb-6 block">
-                <span className="text-[#d4af37]">WHRIST</span>ORIUM
+                <span className="text-[#B1976B]">WHRIST</span>ORIUM
               </Link>
               <p className="text-sm text-gray-400 mb-6">
                 Crafting exceptional timepieces that blend traditional
@@ -22,7 +22,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/mens-watches"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Men's Watches
                   </Link>
@@ -30,7 +30,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/womens-watches"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Women's Watches
                   </Link>
@@ -38,7 +38,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/smart-watches"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Smart Watches
                   </Link>
@@ -46,7 +46,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/accessories"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Accessories
                   </Link>
@@ -60,7 +60,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/our-story"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Our Story
                   </Link>
@@ -68,7 +68,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/craftsmanship"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Craftsmanship
                   </Link>
@@ -76,7 +76,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/sustainability"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Sustainability
                   </Link>
@@ -84,7 +84,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/careers"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Careers
                   </Link>
@@ -98,20 +98,20 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/contact"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Contact Us
                   </Link>
                 </li>
                 <li>
-                  <Link to="/faqs" className="hover:text-[#d4af37] transition">
+                  <Link to="/faqs" className="hover:text-[#B1976B] transition">
                     FAQs
                   </Link>
                 </li>
                 <li>
                   <Link
                     to="/shipping"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Shipping & Returns
                   </Link>
@@ -119,7 +119,7 @@ const Footer = () => {
                 <li>
                   <Link
                     to="/store-locator"
-                    className="hover:text-[#d4af37] transition"
+                    className="hover:text-[#B1976B] transition"
                   >
                     Store Locator
                   </Link>

@@ -29,12 +29,12 @@ const Header = () => {
             <button aria-label="Search">
               <Search className="h-5 w-5 text-gray-300 hover:text-[#B1976B] transition cursor-pointer" />
             </button>
-            <button aria-label="Cart">
+            <Link to="/cart" aria-label="Cart">
               <ShoppingBag className="h-5 w-5 text-gray-300 hover:text-[#B1976B] transition cursor-pointer" />
-            </button>
-            <button aria-label="Favourite">
+            </Link>
+            <Link to="/favourite" aria-label="Favourite">
               <Heart className="h-5 w-5 text-gray-300 hover:text-[#B1976B] transition cursor-pointer" />
-            </button>
+            </Link>
             <button aria-label="Account">
               <User className="h-5 w-5 text-gray-300 hover:text-[#B1976B] transition cursor-pointer" />
             </button>
