@@ -25,7 +25,7 @@ const Header = () => {
               </Link>
             </nav>
           </div>
-          <div className="flex items-center space-x-4 md:space-x-6">
+          <div className="flex items-center justify-between space-x-4 md:space-x-6">
             <button aria-label="Search">
               <Search className="h-5 w-5 text-gray-300 hover:text-[#B1976B] transition cursor-pointer" />
             </button>

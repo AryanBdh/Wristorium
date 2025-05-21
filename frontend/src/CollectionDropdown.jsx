@@ -25,7 +25,7 @@ const CollectionDropdown = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-4 bg-[#1E293B] shadow-lg rounded-md z-40">
+        <div className="absolute left-0 mt-4 bg-[#162337] shadow-lg rounded-md z-40">
           <ul className="py-2 w-48">
             <li>
               <Link

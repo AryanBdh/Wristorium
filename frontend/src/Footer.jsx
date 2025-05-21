@@ -1,10 +1,21 @@
 import { Link } from "react-router-dom";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
 
 const Footer = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 500,
+      once: false,
+      mirror: false,
+    });
+  }, []);
+
   return (
     <>
       <footer className=" mt-15 mb-0 pt-16  border-t border-gray-800 ">
-        <div className="max-w-7xl mx-auto">
+        <div data-aos="fade-up" className="max-w-7xl mx-auto">
           <div className=" grid grid-cols-1 md:grid-cols-4 gap-20 mb-12">
             <div>
               <Link to="/" className="text-xl font-bold text-white mb-6 block">
