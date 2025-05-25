@@ -9,9 +9,8 @@ const Collections = () => {
 
  useEffect(() => {
     AOS.init({
+      once: true,
       duration: 500,
-      once: false,
-      mirror: false,
     });
   }, []);
 

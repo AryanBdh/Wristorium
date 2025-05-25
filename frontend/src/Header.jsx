@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Search, ShoppingBag, User, Heart } from "lucide-react";
 import MobileMenu from "./MobileMenu";
 import CollectionDropdown from "./CollectionDropdown";
+import UserDropdown from "./UserDropdown";
 
 const Header = () => {
   return (
@@ -35,9 +36,7 @@ const Header = () => {
             <Link to="/favourite" aria-label="Favourite">
               <Heart className="h-5 w-5 text-gray-300 hover:text-[#B1976B] transition cursor-pointer" />
             </Link>
-            <button aria-label="Account">
-              <User className="h-5 w-5 text-gray-300 hover:text-[#B1976B] transition cursor-pointer" />
-            </button>
+            <UserDropdown />
             <MobileMenu />
           </div>
         </div>
