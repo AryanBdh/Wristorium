@@ -1,6 +1,6 @@
 import Header from "../Header";
 import Button from "../ui/Button";
-import bgimg from "../images/bgimg.png"; // Assuming you have a background image
+import bgimg from "../images/banner/aboutbanner.jpg"; // Assuming you have a background image
 
 const About = () => {
   const milestones = [
@@ -158,7 +158,7 @@ const About = () => {
       <Header />
       <div className="bg-[#162337] text-white">
         {/* Hero Section */}
-        <section className="relative h-[60vh] overflow-hidden">
+        <section className="relative h-[60vh] overflow-hidden ">
           <img
             src={bgimg}
             alt="CHRONOLUXE Workshop"

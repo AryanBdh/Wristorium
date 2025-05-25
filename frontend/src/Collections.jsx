@@ -1,6 +1,6 @@
-import womenwatch from "./images/womenswatch.png"
-import menswatch from "./images/menswatch.png"
-import smartwatch from "./images/smartwatch.png"
+import womenwatch from "./images/women's-watch/womenswatch.png"
+import menswatch from "./images/men's-watch/menswatch.png"
+import smartwatch from "./images/smart-watch/smartwatch.png"
 import AOS from "aos";
 import "aos/dist/aos.css";
 import {useEffect } from "react";

@@ -1,4 +1,4 @@
-import bgimg from "./images/bgimg.png";
+import bgimg from "./images/banner/bgimg.png";
 
 const Banner = () => {
   return (
@@ -6,7 +6,7 @@ const Banner = () => {
       <div className="relative w-full h-[40vh] sm:h-[70vh] md:h-[90vh]">
         <img
           src={bgimg}
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-center brightness-90"
           alt="Hero"
         />
         <div className="w-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
