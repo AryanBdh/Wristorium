@@ -199,41 +199,6 @@ const About = () => {
           </div>
         </section>
 
-        {/* Timeline */}
-        <section className="py-20 bg-[#0c1018] border-y border-gray-800">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <span className="text-[#d4af37] text-sm uppercase tracking-wider">
-                OUR JOURNEY
-              </span>
-              <h2 className="text-4xl font-bold mt-4">Milestones in Time</h2>
-            </div>
-
-            <div className="max-w-4xl mx-auto">
-              {milestones.map((milestone, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col md:flex-row items-start mb-12 last:mb-0"
-                >
-                  <div className="flex-shrink-0 w-full md:w-32 mb-4 md:mb-0">
-                    <div className="text-3xl font-bold text-[#d4af37]">
-                      {milestone.year}
-                    </div>
-                  </div>
-                  <div className="flex-1 md:ml-8">
-                    <div className="bg-[#0f1420] rounded-lg p-6">
-                      <h3 className="text-xl font-semibold mb-3">
-                        {milestone.title}
-                      </h3>
-                      <p className="text-gray-300">{milestone.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Values */}
         <section className="py-20 container mx-auto px-4">
           <div className="text-center mb-16">

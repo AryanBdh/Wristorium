@@ -28,9 +28,7 @@ const Newsletter = () => {
               placeholder="Your email address"
               className="bg-[#1a1f2c] border-gray-700 rounded-none "
             />
-            <Button className="bg-[#B1976B]  text-white rounded-none">
-              Subscribe
-            </Button>
+            <button className="bg-[#b1976b] px-4">Subscribe</button>
           </form>
         </div>
       </section>
