@@ -6,6 +6,10 @@ import Contact from './Components/Contact'
 import Shop from './Components/Shop'
 import Favorites from './Components/Favourites'
 import Cart from './Components/Cart'
+import Register from './Auth/Register'
+import Login from './Auth/Login'
+import UserProfile from './Components/Profile/UserProfile'
+import AdminDashboard from './Admin/AdminDashboard'
 
 const RouterComponent = () => {
   return (
@@ -17,6 +21,10 @@ const RouterComponent = () => {
         <Route path="/shop" element={<Shop/>} />
         <Route path="/favourites" element={<Favorites/>} />
         <Route path="/cart" element={<Cart/>} />
+        <Route path="/register" element={<Register/>} />
+        <Route path="/login" element={<Login/>} />
+        <Route path="/profile" element={<UserProfile/>} />
+        <Route path="/dashboard" element={<AdminDashboard/>} />
       </Routes>
     </div>
   )

@@ -11,7 +11,7 @@ export const CartProvider = ({ children }) => {
   // Load cart from localStorage on mount
   useEffect(() => {
     try {
-      const savedCart = localStorage.getItem("chronoluxe-cart")
+      const savedCart = localStorage.getItem("whristorium-cart")
       if (savedCart) {
         setCartItems(JSON.parse(savedCart))
       }
@@ -24,7 +24,7 @@ export const CartProvider = ({ children }) => {
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem("chronoluxe-cart", JSON.stringify(cartItems))
+      localStorage.setItem("whristorium-cart", JSON.stringify(cartItems))
     } catch (error) {
       console.error("Error saving cart to localStorage:", error)
     }

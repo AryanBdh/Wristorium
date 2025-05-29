@@ -11,7 +11,7 @@ export const FavoritesProvider = ({ children }) => {
   // Load favorites from localStorage on mount
   useEffect(() => {
     try {
-      const savedFavorites = localStorage.getItem("chronoluxe-favorites")
+      const savedFavorites = localStorage.getItem("whristorium-favorites")
       if (savedFavorites) {
         setFavoriteIds(JSON.parse(savedFavorites))
       }
@@ -24,7 +24,7 @@ export const FavoritesProvider = ({ children }) => {
   // Save favorites to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem("chronoluxe-favorites", JSON.stringify(favoriteIds))
+      localStorage.setItem("whristorium-favorites", JSON.stringify(favoriteIds))
     } catch (error) {
       console.error("Error saving favorites to localStorage:", error)
     }
