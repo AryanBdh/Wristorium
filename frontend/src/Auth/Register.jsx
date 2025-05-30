@@ -64,8 +64,7 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // This is where you would integrate with your authentication system
-      // For now, we'll just simulate a successful registration
+     
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       toast.success("Registration successful! Welcome to WHRISTORIUM.", {
@@ -83,31 +82,7 @@ const Register = () => {
     }
   };
 
-  // Password strength indicator
-  const getPasswordStrength = (password) => {
-    if (!password) return { strength: 0, label: "" };
-
-    const hasLowercase = /[a-z]/.test(password);
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecial = /[^A-Za-z0-9]/.test(password);
-    const isLongEnough = password.length >= 8;
-
-    const criteria = [
-      hasLowercase,
-      hasUppercase,
-      hasNumber,
-      hasSpecial,
-      isLongEnough,
-    ];
-    const metCriteria = criteria.filter(Boolean).length;
-
-    if (metCriteria <= 2) return { strength: 1, label: "Weak" };
-    if (metCriteria <= 4) return { strength: 2, label: "Medium" };
-    return { strength: 3, label: "Strong" };
-  };
-
-  const passwordStrength = getPasswordStrength(formData.password);
+  
 
   return (
     <>

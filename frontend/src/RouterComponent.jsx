@@ -10,6 +10,8 @@ import Register from './Auth/Register'
 import Login from './Auth/Login'
 import UserProfile from './Components/Profile/UserProfile'
 import AdminDashboard from './Admin/AdminDashboard'
+import AddProduct from './Admin/AddProduct'
+import ProductDetail from './Components/Product/ProductDetail'
 
 const RouterComponent = () => {
   return (
@@ -25,6 +27,8 @@ const RouterComponent = () => {
         <Route path="/login" element={<Login/>} />
         <Route path="/profile" element={<UserProfile/>} />
         <Route path="/dashboard" element={<AdminDashboard/>} />
+        <Route path="/dashboard/add-product" element={<AddProduct/>} />
+        <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
     </div>
   )

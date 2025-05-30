@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Search, Filter, Heart, ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import { useCart } from "../context/CartContext";
@@ -279,8 +280,9 @@ const Shop = () => {
               }
             >
               {paginatedWatches.map((watch) => (
-                <div
+                <Link
                   key={watch.id}
+                  to={`/product/${watch.id}`}
                   className={`group bg-[#0f1420] rounded-lg overflow-hidden hover:bg-[#1a1f2c] transition-colors ${
                     viewMode === "list" ? "flex gap-6" : ""
                   }`}
@@ -385,7 +387,7 @@ const Shop = () => {
                       </Button>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
