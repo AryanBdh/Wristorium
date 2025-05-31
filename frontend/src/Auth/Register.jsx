@@ -14,7 +14,6 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    agreeTerms: false,
   })
 
   const [errors, setErrors] = useState({})
@@ -61,10 +60,6 @@ const Register = () => {
       case "confirmPassword":
         if (!value) return "Please confirm your password"
         if (value !== formData.password) return "Passwords do not match"
-        return ""
-
-      case "agreeTerms":
-        if (!value) return "You must agree to the Terms of Service and Privacy Policy"
         return ""
 
       default:
@@ -118,7 +113,6 @@ const Register = () => {
       email: true,
       password: true,
       confirmPassword: true,
-      agreeTerms: true,
     }
     setTouched(allTouched)
 
@@ -142,8 +136,60 @@ const Register = () => {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      console.log("Sending registration data:", {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: "********", // Don't log actual password
+      })
+
+      const res = await fetch("http://localhost:3000/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      console.log("Registration response status:", res.status)
+      const data = await res.json()
+      console.log("Registration response data:", data)
+
+      // Check for specific error fields that your backend returns
+      if (data.emailError) {
+        setErrors({ email: data.emailError })
+        throw new Error(data.emailError)
+      }
+
+      if (data.submitError) {
+        setErrors({ submit: data.submitError })
+        throw new Error(data.submitError)
+      }
+
+      if (!data.token) {
+        throw new Error("Registration failed. Please try again.")
+      }
+
+      // Save token to localStorage
+      localStorage.setItem("token", data.token)
+
+      // Fetch user profile with the token
+      const profileRes = await fetch("http://localhost:3000/user/profile", {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      })
+
+      const userProfile = await profileRes.json()
+      console.log("User profile data:", userProfile)
+
+      // Save user profile to localStorage
+      localStorage.setItem("user", JSON.stringify(userProfile))
 
       toast.success("Registration successful! Welcome to WHRISTORIUM.", {
         icon: "✨",
@@ -152,8 +198,8 @@ const Register = () => {
 
       navigate("/")
     } catch (error) {
-      setErrors({ submit: "Registration failed. Please try again." })
-      toast.error("Registration failed. Please try again.", {
+      console.error("Registration error:", error)
+      toast.error(error.message || "Registration failed. Please try again.", {
         id: "register-error",
       })
     } finally {
@@ -171,21 +217,6 @@ const Register = () => {
     }
     return baseClass
   }
-
-  const getPasswordStrength = (password) => {
-    let strength = 0
-    if (password.length >= 8) strength++
-    if (/(?=.*[a-z])/.test(password)) strength++
-    if (/(?=.*[A-Z])/.test(password)) strength++
-    if (/(?=.*\d)/.test(password)) strength++
-    if (/(?=.*[@$!%*?&])/.test(password)) strength++
-
-    return strength
-  }
-
-  const passwordStrength = getPasswordStrength(formData.password)
-  const strengthLabels = ["Very Weak", "Weak", "Fair", "Good", "Strong"]
-  const strengthColors = ["bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"]
 
   return (
     <>
@@ -337,23 +368,6 @@ const Register = () => {
                     </button>
                   </div>
 
-                  {/* Password Strength Indicator */}
-                  {formData.password && (
-                    <div className="mt-2">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="flex-1 bg-gray-700 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              strengthColors[passwordStrength - 1] || "bg-gray-700"
-                            }`}
-                            style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-400">{strengthLabels[passwordStrength - 1] || ""}</span>
-                      </div>
-                    </div>
-                  )}
-
                   {errors.password && touched.password && (
                     <p id="password-error" className="text-sm text-red-400 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
@@ -484,43 +498,6 @@ const Register = () => {
                     </p>
                   )}
                 </div>
-
-                <div className="flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="agreeTerms"
-                      name="agreeTerms"
-                      type="checkbox"
-                      checked={formData.agreeTerms}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={`h-4 w-4 rounded border-gray-600 bg-[#1a1f2c] text-[#d4af37] focus:ring-[#d4af37] ${
-                        errors.agreeTerms && touched.agreeTerms ? "border-red-500" : ""
-                      }`}
-                      aria-invalid={errors.agreeTerms && touched.agreeTerms ? "true" : "false"}
-                      aria-describedby={errors.agreeTerms && touched.agreeTerms ? "agreeTerms-error" : undefined}
-                    />
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <label htmlFor="agreeTerms" className="text-gray-300">
-                      I agree to the{" "}
-                      <Link to="/terms" className="text-[#d4af37] hover:underline">
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link to="/privacy" className="text-[#d4af37] hover:underline">
-                        Privacy Policy
-                      </Link>{" "}
-                      <span className="text-red-400">*</span>
-                    </label>
-                  </div>
-                </div>
-                {errors.agreeTerms && touched.agreeTerms && (
-                  <p id="agreeTerms-error" className="text-sm text-red-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.agreeTerms}
-                  </p>
-                )}
 
                 <Button
                   type="submit"

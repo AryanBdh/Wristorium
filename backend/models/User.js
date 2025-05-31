@@ -18,16 +18,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    gender: {
-        type: String,
-        enum: ["male", "female"],
-        required: true,
-    },
-    role: {
-        type: String,
-        enum: ["user", "admin"],
-        default: "user",
-    },
     image: {
         type: String,
     }
@@ -40,10 +30,10 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) {
-        next();
+        return next();
     }
     this.password = await bcrypt.hash(this.password, 10);
-
+    next();
 });
 
 userSchema.methods.toJSON = function () {
@@ -64,7 +54,7 @@ userSchema.methods.comparePassword = function (password) {
 userSchema.methods.generateToken = function () {
     let secret = process.env.JWT_SECRET;
     let expiresDate = process.env.JWT_EXPIRES_IN;
-    return jwt.sign({ id: this._id, role: this.role }, secret, {
+    return jwt.sign({ id: this._id}, secret, {
         expiresIn: expiresDate,
     });
 };

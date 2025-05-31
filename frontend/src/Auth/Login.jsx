@@ -74,17 +74,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Mark all fields as touched
-    const allTouched = { email: true, password: true }
-    setTouched(allTouched)
-
-    // Validate all fields
+    setTouched({ email: true, password: true })
     const formErrors = validateForm()
     setErrors(formErrors)
 
-    // Check if form is valid
     if (Object.keys(formErrors).length > 0) {
-      // Focus on first error field
       const firstErrorField = Object.keys(formErrors)[0]
       document.querySelector(`[name="${firstErrorField}"]`)?.focus()
       return
@@ -93,18 +87,57 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const res = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      const data = await res.json()
+
+      // Check for specific error fields that your backend returns
+      if (data.emailError) {
+        setErrors({ email: data.emailError })
+        throw new Error(data.emailError)
+      }
+
+      if (data.passwordError) {
+        setErrors({ password: data.passwordError })
+        throw new Error(data.passwordError)
+      }
+
+      if (!data.token) {
+        throw new Error("Login failed. Please try again.")
+      }
+
+      // Save token to localStorage
+      localStorage.setItem("token", data.token)
+
+      // Fetch user profile with the token
+      const profileRes = await fetch("http://localhost:3000/user/profile", {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      })
+
+      const userProfile = await profileRes.json()
+
+      // Save user profile to localStorage
+      localStorage.setItem("user", JSON.stringify(userProfile))
 
       toast.success("Login successful! Welcome back.", {
         icon: "👋",
         id: "login-success",
       })
 
-      navigate("/")
+      navigate("/") // Redirect to homepage
     } catch (error) {
-      setErrors({ submit: "Invalid email or password. Please try again." })
-      toast.error("Login failed. Please check your credentials.", {
+      toast.error(error.message || "Login failed", {
         id: "login-error",
       })
     } finally {

@@ -14,10 +14,15 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.static('public'));
 
 app.use('/',webRouter);
-connection();
-UserTableSeeder.run();    
 
-const port=process.env.PORT || 3000;
-app.listen(port,()=>{
+const startServer = async () => {
+  await connection(); // ensure DB is connected
+  await UserTableSeeder.run(); // run the seeder
+
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
-});
+  });
+};
+
+startServer();

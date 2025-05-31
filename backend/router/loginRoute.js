@@ -2,8 +2,8 @@ import express from 'express';
 import LoginController from '../controller/LoginController.js';
 
 const loginRoute = express.Router();
-const loignInstance = new LoginController();
+const loginInstance = new LoginController();
 
-loginRoute.post('/', loignInstance.login);
-loginRoute.get('/token-verify', loignInstance.tokenVerify);
+loginRoute.post('/', loginInstance.login);
+loginRoute.get('/token-verify', loginInstance.tokenVerify);
 export default loginRoute;
