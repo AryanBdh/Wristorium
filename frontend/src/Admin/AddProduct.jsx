@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload, X, Plus, Minus, Save, ArrowLeft } from "lucide-react";
+import {
+  Upload,
+  X,
+  Plus,
+  Minus,
+  Save,
+  ArrowLeft,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import toast from "react-hot-toast";
@@ -10,6 +19,9 @@ import toast from "react-hot-toast";
 const AddProduct = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+
   const [productData, setProductData] = useState({
     name: "",
     description: "",
@@ -22,7 +34,6 @@ const AddProduct = () => {
     isNew: false,
     isSale: false,
     stock: "",
-    sku: "",
     weight: "",
     dimensions: {
       diameter: "",
@@ -51,13 +62,157 @@ const AddProduct = () => {
     { value: "smart", label: "Smart Watches" },
   ];
 
-  
+  // Validation rules
+  const validateField = (field, value) => {
+    switch (field) {
+      case "name":
+        if (!value.trim()) return "Product name is required";
+        if (value.trim().length < 3)
+          return "Product name must be at least 3 characters";
+        if (value.trim().length > 100)
+          return "Product name must be less than 100 characters";
+        return "";
+
+      case "description":
+        if (!value.trim()) return "Description is required";
+        if (value.trim().length < 20)
+          return "Description must be at least 20 characters";
+        if (value.trim().length > 1000)
+          return "Description must be less than 1000 characters";
+        return "";
+
+      case "price":
+        if (!value) return "Price is required";
+        const price = Number.parseFloat(value);
+        if (isNaN(price) || price <= 0)
+          return "Price must be a positive number";
+        if (price > 1000000) return "Price must be less than $1,000,000";
+        return "";
+
+      case "originalPrice":
+        if (value && value.trim()) {
+          const originalPrice = Number.parseFloat(value);
+          const currentPrice = Number.parseFloat(productData.price);
+          if (isNaN(originalPrice) || originalPrice <= 0)
+            return "Original price must be a positive number";
+          if (originalPrice <= currentPrice)
+            return "Original price must be higher than current price";
+          if (originalPrice > 1000000)
+            return "Original price must be less than $1,000,000";
+        }
+        return "";
+
+      case "stock":
+        if (!value) return "Stock quantity is required";
+        const stock = Number.parseInt(value);
+        if (isNaN(stock) || stock < 0)
+          return "Stock must be a non-negative number";
+        if (stock > 10000) return "Stock must be less than 10,000";
+        return "";
+
+      case "sku":
+        if (value && value.trim()) {
+          if (value.trim().length < 3)
+            return "SKU must be at least 3 characters";
+          if (value.trim().length > 50)
+            return "SKU must be less than 50 characters";
+          if (!/^[A-Za-z0-9\-_]+$/.test(value.trim()))
+            return "SKU can only contain letters, numbers, hyphens, and underscores";
+        }
+        return "";
+
+      case "weight":
+        if (value && value.trim()) {
+          const weight = Number.parseFloat(value);
+          if (isNaN(weight) || weight <= 0)
+            return "Weight must be a positive number";
+          if (weight > 1000) return "Weight must be less than 1000 grams";
+        }
+        return "";
+
+      case "features":
+        const validFeatures = value.filter((f) => f.trim());
+        if (validFeatures.length === 0)
+          return "At least one feature is required";
+        if (validFeatures.some((f) => f.trim().length > 100))
+          return "Each feature must be less than 100 characters";
+        return "";
+
+      case "images":
+        if (value.length === 0) return "At least one product image is required";
+        if (value.length > 6) return "Maximum 6 images allowed";
+        return "";
+
+      default:
+        return "";
+    }
+  };
+
+  const validateNestedField = (section, field, value) => {
+    if (value && value.trim()) {
+      if (
+        field === "diameter" ||
+        field === "thickness" ||
+        field === "lugWidth"
+      ) {
+        const num = Number.parseFloat(value);
+        if (isNaN(num) || num <= 0) return `${field} must be a positive number`;
+        if (num > 1000) return `${field} must be less than 1000mm`;
+      }
+    }
+    return "";
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validate basic fields
+    const basicFields = [
+      "name",
+      "description",
+      "price",
+      "originalPrice",
+      "stock",
+      "sku",
+      "weight",
+    ];
+    basicFields.forEach((field) => {
+      const error = validateField(field, productData[field]);
+      if (error) newErrors[field] = error;
+    });
+
+    // Validate features
+    const featuresError = validateField("features", productData.features);
+    if (featuresError) newErrors.features = featuresError;
+
+    // Validate images
+    const imagesError = validateField("images", productData.images);
+    if (imagesError) newErrors.images = imagesError;
+
+    // Validate nested fields
+    Object.keys(productData.dimensions).forEach((field) => {
+      const error = validateNestedField(
+        "dimensions",
+        field,
+        productData.dimensions[field]
+      );
+      if (error) newErrors[`dimensions.${field}`] = error;
+    });
+
+    return newErrors;
+  };
 
   const handleInputChange = (field, value) => {
     setProductData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    // Real-time validation
+    if (touched[field]) {
+      const error = validateField(field, value);
+      setErrors((prev) => ({ ...prev, [field]: error }));
+    }
   };
 
   const handleNestedInputChange = (section, field, value) => {
@@ -68,6 +223,13 @@ const AddProduct = () => {
         [field]: value,
       },
     }));
+
+    // Real-time validation for nested fields
+    const fieldKey = `${section}.${field}`;
+    if (touched[fieldKey]) {
+      const error = validateNestedField(section, field, value);
+      setErrors((prev) => ({ ...prev, [fieldKey]: error }));
+    }
   };
 
   const handleArrayInputChange = (field, index, value) => {
@@ -75,6 +237,34 @@ const AddProduct = () => {
       ...prev,
       [field]: prev[field].map((item, i) => (i === index ? value : item)),
     }));
+
+    // Real-time validation for array fields
+    if (touched[field]) {
+      const error = validateField(
+        field,
+        productData[field].map((item, i) => (i === index ? value : item))
+      );
+      setErrors((prev) => ({ ...prev, [field]: error }));
+    }
+  };
+
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+
+    const error = validateField(field, productData[field]);
+    setErrors((prev) => ({ ...prev, [field]: error }));
+  };
+
+  const handleNestedBlur = (section, field) => {
+    const fieldKey = `${section}.${field}`;
+    setTouched((prev) => ({ ...prev, [fieldKey]: true }));
+
+    const error = validateNestedField(
+      section,
+      field,
+      productData[section][field]
+    );
+    setErrors((prev) => ({ ...prev, [fieldKey]: error }));
   };
 
   const addArrayItem = (field) => {
@@ -89,6 +279,13 @@ const AddProduct = () => {
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
+
+    // Re-validate after removal
+    if (touched[field]) {
+      const newArray = productData[field].filter((_, i) => i !== index);
+      const error = validateField(field, newArray);
+      setErrors((prev) => ({ ...prev, [field]: error }));
+    }
   };
 
   const handleImageUpload = (files) => {
@@ -97,18 +294,34 @@ const AddProduct = () => {
 
     // Create preview URLs
     const newImageUrls = newFiles.map((file) => URL.createObjectURL(file));
+    const updatedImages = [...productData.images, ...newImageUrls];
+
     setProductData((prev) => ({
       ...prev,
-      images: [...prev.images, ...newImageUrls],
+      images: updatedImages,
     }));
+
+    // Validate images
+    if (touched.images) {
+      const error = validateField("images", updatedImages);
+      setErrors((prev) => ({ ...prev, images: error }));
+    }
   };
 
   const removeImage = (index) => {
     setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    const updatedImages = productData.images.filter((_, i) => i !== index);
+
     setProductData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index),
+      images: updatedImages,
     }));
+
+    // Validate images after removal
+    if (touched.images) {
+      const error = validateField("images", updatedImages);
+      setErrors((prev) => ({ ...prev, images: error }));
+    }
   };
 
   const handleDrag = (e) => {
@@ -131,32 +344,44 @@ const AddProduct = () => {
     }
   };
 
-  const validateForm = () => {
-    const required = ["name", "description", "price", "stock"];
-    const missing = required.filter((field) => !productData[field]);
-
-    if (missing.length > 0) {
-      toast.error(`Please fill in required fields: ${missing.join(", ")}`);
-      return false;
-    }
-
-    if (productData.features.filter((f) => f.trim()).length === 0) {
-      toast.error("Please add at least one feature");
-      return false;
-    }
-
-    if (productData.images.length === 0) {
-      toast.error("Please add at least one product image");
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    // Mark all fields as touched
+    const allTouched = {
+      name: true,
+      description: true,
+      price: true,
+      originalPrice: true,
+      stock: true,
+      sku: true,
+      weight: true,
+      features: true,
+      images: true,
+      "dimensions.diameter": true,
+      "dimensions.thickness": true,
+      "dimensions.lugWidth": true,
+    };
+    setTouched(allTouched);
+
+    // Validate all fields
+    const formErrors = validateForm();
+    setErrors(formErrors);
+
+    // Check if form is valid
+    if (Object.keys(formErrors).length > 0) {
+      // Focus on first error field
+      const firstErrorField = Object.keys(formErrors)[0];
+      const element =
+        document.querySelector(`[name="${firstErrorField}"]`) ||
+        document.querySelector(`[name="${firstErrorField.replace(".", "-")}"]`);
+      element?.focus();
+
+      toast.error("Please fix the errors before submitting", {
+        id: "validation-error",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -171,12 +396,36 @@ const AddProduct = () => {
 
       navigate("/dashboard");
     } catch (error) {
+      setErrors({ submit: "Failed to add product. Please try again." });
       toast.error("Failed to add product. Please try again.", {
         id: "product-add-error",
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const getFieldClassName = (fieldName) => {
+    const baseClass = "w-full";
+    if (errors[fieldName] && touched[fieldName]) {
+      return `${baseClass} border-red-500 focus:border-red-500 focus:ring-red-500`;
+    }
+    if (!errors[fieldName] && touched[fieldName] && productData[fieldName]) {
+      return `${baseClass} border-green-500 focus:border-green-500 focus:ring-green-500`;
+    }
+    return baseClass;
+  };
+
+  const getNestedFieldClassName = (section, field) => {
+    const fieldKey = `${section}.${field}`;
+    const baseClass = "w-full";
+    if (errors[fieldKey] && touched[fieldKey]) {
+      return `${baseClass} border-red-500 focus:border-red-500 focus:ring-red-500`;
+    }
+    if (!errors[fieldKey] && touched[fieldKey] && productData[section][field]) {
+      return `${baseClass} border-green-500 focus:border-green-500 focus:ring-green-500`;
+    }
+    return baseClass;
   };
 
   return (
@@ -188,7 +437,7 @@ const AddProduct = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Button
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate("/admin")}
                   variant="outline"
                   className="border-gray-600"
                 >
@@ -207,7 +456,18 @@ const AddProduct = () => {
         </div>
 
         <div className="container mx-auto px-4 py-8">
-          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-4xl mx-auto space-y-8"
+            noValidate
+          >
+            {errors.submit && (
+              <div className="p-4 bg-red-900/20 border border-red-700 rounded-lg flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+                <p className="text-red-400 text-sm">{errors.submit}</p>
+              </div>
+            )}
+
             {/* Basic Information */}
             <div className="bg-[#0f1420] rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-6">Basic Information</h2>
@@ -217,21 +477,74 @@ const AddProduct = () => {
                   <label className="block text-sm font-medium mb-2">
                     Product Name <span className="text-red-400">*</span>
                   </label>
-                  <Input
-                    value={productData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    placeholder="e.g., Sovereign Classic"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      name="name"
+                      value={productData.name}
+                      onChange={(e) =>
+                        handleInputChange("name", e.target.value)
+                      }
+                      onBlur={() => handleBlur("name")}
+                      placeholder="e.g., Sovereign Classic"
+                      className={getFieldClassName("name")}
+                      aria-invalid={
+                        errors.name && touched.name ? "true" : "false"
+                      }
+                      aria-describedby={
+                        errors.name && touched.name ? "name-error" : undefined
+                      }
+                    />
+                    {!errors.name && touched.name && productData.name && (
+                      <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                    )}
+                    {errors.name && touched.name && (
+                      <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                  {errors.name && touched.name && (
+                    <p
+                      id="name-error"
+                      className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.name}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">SKU</label>
-                  <Input
-                    value={productData.sku}
-                    onChange={(e) => handleInputChange("sku", e.target.value)}
-                    placeholder="e.g., WH-SC-001"
-                  />
+                  <div className="relative">
+                    <Input
+                      name="sku"
+                      value={productData.sku}
+                      onChange={(e) => handleInputChange("sku", e.target.value)}
+                      onBlur={() => handleBlur("sku")}
+                      placeholder="e.g., WH-SC-001"
+                      className={getFieldClassName("sku")}
+                      aria-invalid={
+                        errors.sku && touched.sku ? "true" : "false"
+                      }
+                      aria-describedby={
+                        errors.sku && touched.sku ? "sku-error" : undefined
+                      }
+                    />
+                    {!errors.sku && touched.sku && productData.sku && (
+                      <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                    )}
+                    {errors.sku && touched.sku && (
+                      <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                  {errors.sku && touched.sku && (
+                    <p
+                      id="sku-error"
+                      className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.sku}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -239,12 +552,12 @@ const AddProduct = () => {
                     Category <span className="text-red-400">*</span>
                   </label>
                   <select
+                    name="category"
                     value={productData.category}
                     onChange={(e) =>
                       handleInputChange("category", e.target.value)
                     }
                     className="w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2"
-                    required
                   >
                     {categories.map((cat) => (
                       <option key={cat.value} value={cat.value}>
@@ -258,54 +571,179 @@ const AddProduct = () => {
                   <label className="block text-sm font-medium mb-2">
                     Price <span className="text-red-400">*</span>
                   </label>
-                  <Input
-                    type="number"
-                    value={productData.price}
-                    onChange={(e) => handleInputChange("price", e.target.value)}
-                    placeholder="2450"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      name="price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={productData.price}
+                      onChange={(e) =>
+                        handleInputChange("price", e.target.value)
+                      }
+                      onBlur={() => handleBlur("price")}
+                      placeholder="2450"
+                      className={getFieldClassName("price")}
+                      aria-invalid={
+                        errors.price && touched.price ? "true" : "false"
+                      }
+                      aria-describedby={
+                        errors.price && touched.price
+                          ? "price-error"
+                          : undefined
+                      }
+                    />
+                    {!errors.price && touched.price && productData.price && (
+                      <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                    )}
+                    {errors.price && touched.price && (
+                      <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                  {errors.price && touched.price && (
+                    <p
+                      id="price-error"
+                      className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.price}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Original Price (if on sale)
                   </label>
-                  <Input
-                    type="number"
-                    value={productData.originalPrice}
-                    onChange={(e) =>
-                      handleInputChange("originalPrice", e.target.value)
-                    }
-                    placeholder="2800"
-                  />
+                  <div className="relative">
+                    <Input
+                      name="originalPrice"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={productData.originalPrice}
+                      onChange={(e) =>
+                        handleInputChange("originalPrice", e.target.value)
+                      }
+                      onBlur={() => handleBlur("originalPrice")}
+                      placeholder="2800"
+                      className={getFieldClassName("originalPrice")}
+                      aria-invalid={
+                        errors.originalPrice && touched.originalPrice
+                          ? "true"
+                          : "false"
+                      }
+                      aria-describedby={
+                        errors.originalPrice && touched.originalPrice
+                          ? "originalPrice-error"
+                          : undefined
+                      }
+                    />
+                    {!errors.originalPrice &&
+                      touched.originalPrice &&
+                      productData.originalPrice && (
+                        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                      )}
+                    {errors.originalPrice && touched.originalPrice && (
+                      <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                  {errors.originalPrice && touched.originalPrice && (
+                    <p
+                      id="originalPrice-error"
+                      className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.originalPrice}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Stock Quantity <span className="text-red-400">*</span>
                   </label>
-                  <Input
-                    type="number"
-                    value={productData.stock}
-                    onChange={(e) => handleInputChange("stock", e.target.value)}
-                    placeholder="25"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      name="stock"
+                      type="number"
+                      min="0"
+                      value={productData.stock}
+                      onChange={(e) =>
+                        handleInputChange("stock", e.target.value)
+                      }
+                      onBlur={() => handleBlur("stock")}
+                      placeholder="25"
+                      className={getFieldClassName("stock")}
+                      aria-invalid={
+                        errors.stock && touched.stock ? "true" : "false"
+                      }
+                      aria-describedby={
+                        errors.stock && touched.stock
+                          ? "stock-error"
+                          : undefined
+                      }
+                    />
+                    {!errors.stock && touched.stock && productData.stock && (
+                      <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                    )}
+                    {errors.stock && touched.stock && (
+                      <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                  {errors.stock && touched.stock && (
+                    <p
+                      id="stock-error"
+                      className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.stock}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Weight (grams)
                   </label>
-                  <Input
-                    type="number"
-                    value={productData.weight}
-                    onChange={(e) =>
-                      handleInputChange("weight", e.target.value)
-                    }
-                    placeholder="165"
-                  />
+                  <div className="relative">
+                    <Input
+                      name="weight"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={productData.weight}
+                      onChange={(e) =>
+                        handleInputChange("weight", e.target.value)
+                      }
+                      onBlur={() => handleBlur("weight")}
+                      placeholder="165"
+                      className={getFieldClassName("weight")}
+                      aria-invalid={
+                        errors.weight && touched.weight ? "true" : "false"
+                      }
+                      aria-describedby={
+                        errors.weight && touched.weight
+                          ? "weight-error"
+                          : undefined
+                      }
+                    />
+                    {!errors.weight && touched.weight && productData.weight && (
+                      <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                    )}
+                    {errors.weight && touched.weight && (
+                      <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                  {errors.weight && touched.weight && (
+                    <p
+                      id="weight-error"
+                      className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.weight}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -313,16 +751,67 @@ const AddProduct = () => {
                 <label className="block text-sm font-medium mb-2">
                   Description <span className="text-red-400">*</span>
                 </label>
-                <textarea
-                  value={productData.description}
-                  onChange={(e) =>
-                    handleInputChange("description", e.target.value)
-                  }
-                  rows={4}
-                  className="w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 resize-none"
-                  placeholder="Detailed description of the timepiece..."
-                  required
-                />
+                <div className="relative">
+                  <textarea
+                    name="description"
+                    value={productData.description}
+                    onChange={(e) =>
+                      handleInputChange("description", e.target.value)
+                    }
+                    onBlur={() => handleBlur("description")}
+                    rows={4}
+                    className={`w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 resize-none ${
+                      errors.description && touched.description
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : !errors.description &&
+                          touched.description &&
+                          productData.description
+                        ? "border-green-500 focus:border-green-500 focus:ring-green-500"
+                        : ""
+                    }`}
+                    placeholder="Detailed description of the timepiece..."
+                    aria-invalid={
+                      errors.description && touched.description
+                        ? "true"
+                        : "false"
+                    }
+                    aria-describedby={
+                      errors.description && touched.description
+                        ? "description-error"
+                        : undefined
+                    }
+                  />
+                  {!errors.description &&
+                    touched.description &&
+                    productData.description && (
+                      <CheckCircle className="absolute right-3 top-3 h-4 w-4 text-green-500" />
+                    )}
+                  {errors.description && touched.description && (
+                    <AlertCircle className="absolute right-3 top-3 h-4 w-4 text-red-500" />
+                  )}
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  {errors.description && touched.description && (
+                    <p
+                      id="description-error"
+                      className="text-sm text-red-400 flex items-center gap-1"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.description}
+                    </p>
+                  )}
+                  <p
+                    className={`text-xs ml-auto ${
+                      productData.description.length > 900
+                        ? "text-red-400"
+                        : productData.description.length > 800
+                        ? "text-yellow-400"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {productData.description.length}/1000
+                  </p>
+                </div>
               </div>
 
               {/* Status Flags */}
@@ -354,13 +843,17 @@ const AddProduct = () => {
 
             {/* Product Images */}
             <div className="bg-[#0f1420] rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-6">Product Images</h2>
+              <h2 className="text-xl font-semibold mb-6">
+                Product Images <span className="text-red-400">*</span>
+              </h2>
 
               {/* Image Upload Area */}
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                   dragActive
                     ? "border-[#d4af37] bg-[#d4af37]/10"
+                    : errors.images && touched.images
+                    ? "border-red-500 bg-red-500/10"
                     : "border-gray-600 hover:border-gray-500"
                 }`}
                 onDragEnter={handleDrag}
@@ -378,6 +871,11 @@ const AddProduct = () => {
                   multiple
                   accept="image/*"
                   onChange={(e) => handleImageUpload(e.target.files)}
+                  onBlur={() => {
+                    setTouched((prev) => ({ ...prev, images: true }));
+                    const error = validateField("images", productData.images);
+                    setErrors((prev) => ({ ...prev, images: error }));
+                  }}
                   className="hidden"
                   id="image-upload"
                 />
@@ -392,6 +890,13 @@ const AddProduct = () => {
                   Choose Files
                 </Button>
               </div>
+
+              {errors.images && touched.images && (
+                <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.images}
+                </p>
+              )}
 
               {/* Image Previews */}
               {productData.images.length > 0 && (
@@ -426,23 +931,39 @@ const AddProduct = () => {
 
             {/* Features */}
             <div className="bg-[#0f1420] rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-6">Features</h2>
+              <h2 className="text-xl font-semibold mb-6">
+                Features <span className="text-red-400">*</span>
+              </h2>
 
               <div className="space-y-3">
                 {productData.features.map((feature, index) => (
                   <div key={index} className="flex gap-3">
-                    <Input
-                      value={feature}
-                      onChange={(e) =>
-                        handleArrayInputChange(
-                          "features",
-                          index,
-                          e.target.value
-                        )
-                      }
-                      placeholder="e.g., Automatic Movement"
-                      className="flex-1"
-                    />
+                    <div className="flex-1 relative">
+                      <Input
+                        value={feature}
+                        onChange={(e) =>
+                          handleArrayInputChange(
+                            "features",
+                            index,
+                            e.target.value
+                          )
+                        }
+                        onBlur={() => {
+                          setTouched((prev) => ({ ...prev, features: true }));
+                          const error = validateField(
+                            "features",
+                            productData.features
+                          );
+                          setErrors((prev) => ({ ...prev, features: error }));
+                        }}
+                        placeholder="e.g., Automatic Movement"
+                        className={
+                          errors.features && touched.features
+                            ? "border-red-500"
+                            : ""
+                        }
+                      />
+                    </div>
                     {productData.features.length > 1 && (
                       <Button
                         type="button"
@@ -467,6 +988,12 @@ const AddProduct = () => {
                   Add Feature
                 </Button>
               </div>
+              {errors.features && touched.features && (
+                <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.features}
+                </p>
+              )}
             </div>
 
             {/* Dimensions */}
@@ -478,52 +1005,177 @@ const AddProduct = () => {
                   <label className="block text-sm font-medium mb-2">
                     Case Diameter (mm)
                   </label>
-                  <Input
-                    type="number"
-                    value={productData.dimensions.diameter}
-                    onChange={(e) =>
-                      handleNestedInputChange(
+                  <div className="relative">
+                    <Input
+                      name="dimensions-diameter"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={productData.dimensions.diameter}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "dimensions",
+                          "diameter",
+                          e.target.value
+                        )
+                      }
+                      onBlur={() => handleNestedBlur("dimensions", "diameter")}
+                      placeholder="42"
+                      className={getNestedFieldClassName(
                         "dimensions",
-                        "diameter",
-                        e.target.value
-                      )
-                    }
-                    placeholder="42"
-                  />
+                        "diameter"
+                      )}
+                      aria-invalid={
+                        errors["dimensions.diameter"] &&
+                        touched["dimensions.diameter"]
+                          ? "true"
+                          : "false"
+                      }
+                      aria-describedby={
+                        errors["dimensions.diameter"] &&
+                        touched["dimensions.diameter"]
+                          ? "diameter-error"
+                          : undefined
+                      }
+                    />
+                    {!errors["dimensions.diameter"] &&
+                      touched["dimensions.diameter"] &&
+                      productData.dimensions.diameter && (
+                        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                      )}
+                    {errors["dimensions.diameter"] &&
+                      touched["dimensions.diameter"] && (
+                        <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                      )}
+                  </div>
+                  {errors["dimensions.diameter"] &&
+                    touched["dimensions.diameter"] && (
+                      <p
+                        id="diameter-error"
+                        className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                      >
+                        <AlertCircle className="h-3 w-3" />
+                        {errors["dimensions.diameter"]}
+                      </p>
+                    )}
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Case Thickness (mm)
                   </label>
-                  <Input
-                    type="number"
-                    value={productData.dimensions.thickness}
-                    onChange={(e) =>
-                      handleNestedInputChange(
+                  <div className="relative">
+                    <Input
+                      name="dimensions-thickness"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={productData.dimensions.thickness}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "dimensions",
+                          "thickness",
+                          e.target.value
+                        )
+                      }
+                      onBlur={() => handleNestedBlur("dimensions", "thickness")}
+                      placeholder="12"
+                      className={getNestedFieldClassName(
                         "dimensions",
-                        "thickness",
-                        e.target.value
-                      )
-                    }
-                    placeholder="12"
-                  />
+                        "thickness"
+                      )}
+                      aria-invalid={
+                        errors["dimensions.thickness"] &&
+                        touched["dimensions.thickness"]
+                          ? "true"
+                          : "false"
+                      }
+                      aria-describedby={
+                        errors["dimensions.thickness"] &&
+                        touched["dimensions.thickness"]
+                          ? "thickness-error"
+                          : undefined
+                      }
+                    />
+                    {!errors["dimensions.thickness"] &&
+                      touched["dimensions.thickness"] &&
+                      productData.dimensions.thickness && (
+                        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                      )}
+                    {errors["dimensions.thickness"] &&
+                      touched["dimensions.thickness"] && (
+                        <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                      )}
+                  </div>
+                  {errors["dimensions.thickness"] &&
+                    touched["dimensions.thickness"] && (
+                      <p
+                        id="thickness-error"
+                        className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                      >
+                        <AlertCircle className="h-3 w-3" />
+                        {errors["dimensions.thickness"]}
+                      </p>
+                    )}
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Lug Width (mm)
                   </label>
-                  <Input
-                    type="number"
-                    value={productData.dimensions.lugWidth}
-                    onChange={(e) =>
-                      handleNestedInputChange(
+                  <div className="relative">
+                    <Input
+                      name="dimensions-lugWidth"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={productData.dimensions.lugWidth}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "dimensions",
+                          "lugWidth",
+                          e.target.value
+                        )
+                      }
+                      onBlur={() => handleNestedBlur("dimensions", "lugWidth")}
+                      placeholder="22"
+                      className={getNestedFieldClassName(
                         "dimensions",
-                        "lugWidth",
-                        e.target.value
-                      )
-                    }
-                    placeholder="22"
-                  />
+                        "lugWidth"
+                      )}
+                      aria-invalid={
+                        errors["dimensions.lugWidth"] &&
+                        touched["dimensions.lugWidth"]
+                          ? "true"
+                          : "false"
+                      }
+                      aria-describedby={
+                        errors["dimensions.lugWidth"] &&
+                        touched["dimensions.lugWidth"]
+                          ? "lugWidth-error"
+                          : undefined
+                      }
+                    />
+                    {!errors["dimensions.lugWidth"] &&
+                      touched["dimensions.lugWidth"] &&
+                      productData.dimensions.lugWidth && (
+                        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                      )}
+                    {errors["dimensions.lugWidth"] &&
+                      touched["dimensions.lugWidth"] && (
+                        <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                      )}
+                  </div>
+                  {errors["dimensions.lugWidth"] &&
+                    touched["dimensions.lugWidth"] && (
+                      <p
+                        id="lugWidth-error"
+                        className="mt-1 text-sm text-red-400 flex items-center gap-1"
+                      >
+                        <AlertCircle className="h-3 w-3" />
+                        {errors["dimensions.lugWidth"]}
+                      </p>
+                    )}
                 </div>
               </div>
             </div>
@@ -648,22 +1300,34 @@ const AddProduct = () => {
                     <div key={index} className="flex gap-3">
                       <Input
                         value={func}
-                        onChange={(e) =>
-                          handleArrayInputChange(
-                            "specifications.functions",
-                            index,
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => {
+                          const newFunctions = [
+                            ...productData.specifications.functions,
+                          ];
+                          newFunctions[index] = e.target.value;
+                          handleNestedInputChange(
+                            "specifications",
+                            "functions",
+                            newFunctions
+                          );
+                        }}
                         placeholder="e.g., Date Display"
                         className="flex-1"
                       />
                       {productData.specifications.functions.length > 1 && (
                         <Button
                           type="button"
-                          onClick={() =>
-                            removeArrayItem("specifications.functions", index)
-                          }
+                          onClick={() => {
+                            const newFunctions =
+                              productData.specifications.functions.filter(
+                                (_, i) => i !== index
+                              );
+                            handleNestedInputChange(
+                              "specifications",
+                              "functions",
+                              newFunctions
+                            );
+                          }}
                           variant="outline"
                           size="sm"
                           className="border-red-600 text-red-400 hover:bg-red-900/20"
@@ -675,7 +1339,17 @@ const AddProduct = () => {
                   ))}
                   <Button
                     type="button"
-                    onClick={() => addArrayItem("specifications.functions")}
+                    onClick={() => {
+                      const newFunctions = [
+                        ...productData.specifications.functions,
+                        "",
+                      ];
+                      handleNestedInputChange(
+                        "specifications",
+                        "functions",
+                        newFunctions
+                      );
+                    }}
                     variant="outline"
                     size="sm"
                     className="border-gray-600"
@@ -691,7 +1365,7 @@ const AddProduct = () => {
             <div className="flex gap-4 justify-end">
               <Button
                 type="button"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/admin")}
                 variant="outline"
                 className="border-gray-600"
               >
@@ -700,7 +1374,7 @@ const AddProduct = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[#d4af37] hover:bg-[#b8973a] text-black px-8"
+                className="bg-[#d4af37] hover:bg-[#b8973a] text-black px-8 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   "Adding Product..."
