@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Search, Filter, Heart, ShoppingBag } from "lucide-react"
+import { Search, Filter, Heart, ShoppingBag, Grid, List } from "lucide-react"
 import { Link } from "react-router-dom"
 import Button from "../ui/Button"
 import Input from "../ui/Input"
@@ -9,6 +9,7 @@ import { useCart } from "../context/CartContext"
 import { useFavorites } from "../context/FavouritesContext"
 import watchesData from "../data/watches.json"
 import Header from "../Header"
+import toast from "react-hot-toast"
 
 const Shop = () => {
   const { addToCart } = useCart()
@@ -24,6 +25,13 @@ const Shop = () => {
   const [showFilters, setShowFilters] = useState(false)
 
   const itemsPerPage = 9
+
+  // Check if user is logged in
+  const isLoggedIn = () => {
+    const token = localStorage.getItem("token")
+    const user = localStorage.getItem("user")
+    return token && user
+  }
 
   // Filter and search logic
   const filteredWatches = useMemo(() => {
@@ -82,16 +90,57 @@ const Shop = () => {
   }
 
   const handleAddToCart = (e, watch) => {
-    e.preventDefault() // Prevent navigation
-    e.stopPropagation() // Stop event bubbling
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!isLoggedIn()) {
+      toast.error("Please log in to add items to your cart", {
+        id: "login-required-cart",
+        duration: 4000,
+        icon: "🔒",
+      })
+      return
+    }
+
     addToCart(watch)
-    // Optional: Show a toast notification here
+    toast.success(`${watch.name} added to cart!`, {
+      id: "cart-success",
+      duration: 3000,
+      icon: "🛒",
+    })
   }
 
   const handleToggleFavorite = (e, watchId) => {
-    e.preventDefault() // Prevent navigation
-    e.stopPropagation() // Stop event bubbling
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!isLoggedIn()) {
+      toast.error("Please log in to add items to your favorites", {
+        id: "login-required-favorites",
+        duration: 4000,
+        icon: "🔒",
+      })
+      return
+    }
+
+    const watch = watchesData.find((w) => w.id === watchId)
+    const isCurrentlyFavorite = isFavorite(watchId)
+
     toggleFavorite(watchId)
+
+    if (isCurrentlyFavorite) {
+      toast.success(`${watch?.name} removed from favorites`, {
+        id: "favorite-removed",
+        duration: 3000,
+        icon: "💔",
+      })
+    } else {
+      toast.success(`${watch?.name} added to favorites!`, {
+        id: "favorite-added",
+        duration: 3000,
+        icon: "❤️",
+      })
+    }
   }
 
   // Get min and max prices from data
@@ -113,6 +162,30 @@ const Shop = () => {
         </section>
 
         <div className="container mx-auto px-4 py-8">
+          {/* Login Notice for Non-Authenticated Users */}
+          {!isLoggedIn() && (
+            <div className="mb-6 p-4 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-[#d4af37] rounded-full flex items-center justify-center">
+                  <span className="text-black font-bold text-sm">!</span>
+                </div>
+                <div>
+                  <p className="text-[#d4af37] font-medium">Sign in to unlock full features</p>
+                  <p className="text-sm text-gray-300">
+                    <Link to="/login" className="text-[#d4af37] hover:underline">
+                      Log in
+                    </Link>{" "}
+                    or{" "}
+                    <Link to="/register" className="text-[#d4af37] hover:underline">
+                      create an account
+                    </Link>{" "}
+                    to add items to your cart and favorites.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Search and Filter Bar */}
           <div className="mb-8">
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-6">
@@ -130,6 +203,21 @@ const Shop = () => {
 
               {/* View Toggle and Sort */}
               <div className="flex items-center gap-4">
+                <div className="flex items-center border border-gray-600 rounded">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 ${viewMode === "grid" ? "bg-[#d4af37] text-black" : "text-gray-400"}`}
+                  >
+                    <Grid className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 ${viewMode === "list" ? "bg-[#d4af37] text-black" : "text-gray-400"}`}
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                </div>
+
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -174,7 +262,7 @@ const Shop = () => {
                   </div>
 
                   {/* Price Range */}
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">
                       Price Range: ${priceRange[0]} - ${priceRange[1]}
                     </label>
@@ -267,8 +355,11 @@ const Shop = () => {
                       <button
                         onClick={(e) => handleToggleFavorite(e, watch.id)}
                         className={`p-2 rounded-full transition-colors ${
-                          isFavorite(watch.id) ? "bg-red-600 text-white" : "bg-black/50 text-white hover:bg-black/70"
-                        }`}
+                          isLoggedIn() && isFavorite(watch.id)
+                            ? "bg-red-600 text-white"
+                            : "bg-black/50 text-white hover:bg-black/70"
+                        } ${!isLoggedIn() ? "opacity-60" : ""}`}
+                        title={!isLoggedIn() ? "Please log in to add to favorites" : "Add to favorites"}
                       >
                         <Heart className="h-4 w-4" />
                       </button>
@@ -311,7 +402,10 @@ const Shop = () => {
                       <Button
                         onClick={(e) => handleAddToCart(e, watch)}
                         size="sm"
-                        className="bg-[#d4af37] hover:bg-[#b8973a] text-black rounded-none flex items-center gap-2"
+                        className={`bg-[#d4af37] hover:bg-[#b8973a] text-black rounded-none flex items-center gap-2 ${
+                          !isLoggedIn() ? "opacity-60" : ""
+                        }`}
+                        title={!isLoggedIn() ? "Please log in to add to cart" : "Add to cart"}
                       >
                         <ShoppingBag className="h-4 w-4" />
                         Add to Cart
