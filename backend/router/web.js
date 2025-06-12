@@ -3,6 +3,8 @@ import RouteMiddleware from "../middleware/RouteMiddleware.js";
 import userRoute from "./userRoute.js";
 import loginRoute from "./loginRoute.js";
 import registerRoute from "./registerRoute.js";
+import productRoute from "./productRoute.js";
+import orderRoute from "./orderRoute.js";
 
 const auth = new RouteMiddleware();
 
@@ -15,6 +17,8 @@ webRouter.get('/', (req, res) => {
 webRouter.use('/user',auth.check, userRoute);
 webRouter.use('/login', loginRoute);
 webRouter.use('/register', registerRoute);
+webRouter.use('/products', productRoute);
+webRouter.use('/orders', orderRoute);
 
 
 export default webRouter;
