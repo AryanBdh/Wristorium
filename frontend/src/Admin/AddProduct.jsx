@@ -430,7 +430,7 @@ const AddProduct = () => {
 
   return (
     <>
-      <div className="bg-[#0a0e17] text-white min-h-screen">
+      <div className="bg-[#162337] text-white min-h-screen">
         {/* Header */}
         <div className="bg-[#0f1420] border-b border-gray-800">
           <div className="container mx-auto px-4 py-6">

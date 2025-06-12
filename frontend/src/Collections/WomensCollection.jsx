@@ -156,7 +156,7 @@ const WomensCollection = () => {
   return (
     <>
       <Header />
-      <div className="bg-[#0a0e17] text-white min-h-screen">
+      <div className="bg-[#162337] text-white min-h-screen">
         {/* Hero Section */}
         <section className="relative h-[40vh] overflow-hidden bg-gradient-to-r from-[#0a0e17] via-[#2a1f3d] to-[#0a0e17]">
           <div className="absolute inset-0 flex items-center justify-center">
@@ -292,7 +292,7 @@ const WomensCollection = () => {
                   {/* Price Range */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">
-                      Price Range: ${priceRange[0]} - ${priceRange[1]}
+                      Price Range: Rs.{priceRange[0]} - Rs.{priceRange[1]}
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -420,10 +420,10 @@ const WomensCollection = () => {
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-[#d4af37]">${watch.price.toLocaleString()}</span>
+                        <span className="text-xl font-bold text-[#d4af37]">Rs.{watch.price.toLocaleString()}</span>
                         {watch.originalPrice && (
                           <span className="text-sm text-gray-400 line-through">
-                            ${watch.originalPrice.toLocaleString()}
+                            Rs.{watch.originalPrice.toLocaleString()}
                           </span>
                         )}
                       </div>

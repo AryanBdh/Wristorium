@@ -4,6 +4,7 @@ import smartwatch from "./images/smart-watch/smartwatch.png"
 import AOS from "aos";
 import "aos/dist/aos.css";
 import {useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const Collections = () => {
 
@@ -15,16 +16,16 @@ const Collections = () => {
   }, []);
 
   const collections = [
-    { name: "Men's Collection", image: menswatch },
-    { name: "Women's Collection", image: womenwatch },
-    { name: "Smart Collection", image: smartwatch },
+    { name: "Men's Collection", image: menswatch, link: "/collections/men" },
+    { name: "Women's Collection", image: womenwatch, link: "/collections/women" },
+    { name: "Smart Collection", image: smartwatch, link: "/collections/smart" },
   ]
 
   return (
     <section className="w-full py-5 container mx-auto ">
       <div data-aos="fade-up" className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {collections.map((collection, index) => (
-          <div key={index} className="relative group overflow-hidden bg-[#0f1420] rounded-lg cursor-pointer">
+          <Link to={collection.link}  key={index} className="relative group overflow-hidden bg-[#0f1420] rounded-lg cursor-pointer">
             <img
               src={collection.image || "/placeholder.svg"}
               alt={collection.name}
@@ -34,7 +35,7 @@ const Collections = () => {
               <h3 className="text-xl font-semibold mb-1">{collection.name}</h3>
               <p className="text-sm text-[#B1976B] mb-3">Shop Now →</p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

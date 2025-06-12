@@ -11,7 +11,7 @@ const Cart = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="bg-[#0a0e17] text-white min-h-screen">
+      <div className="bg-[#162337] text-white min-h-screen">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-md mx-auto">
             <ShoppingBag className="h-16 w-16 mx-auto mb-6 text-gray-400" />
@@ -31,7 +31,7 @@ const Cart = () => {
   return (
     <>
     <Header />
-    <div className="bg-[#0a0e17] text-white min-h-screen">
+    <div className="bg-[#162337] text-white min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Shopping Cart</h1>
@@ -91,10 +91,10 @@ const Cart = () => {
 
                     <div className="text-right">
                       <div className="text-lg font-bold text-[#d4af37]">
-                        ${(item.price * item.quantity).toLocaleString()}
+                        Rs.{(item.price * item.quantity).toLocaleString()}
                       </div>
                       {item.quantity > 1 && (
-                        <div className="text-sm text-gray-400">${item.price.toLocaleString()} each</div>
+                        <div className="text-sm text-gray-400">Rs.{item.price.toLocaleString()} each</div>
                       )}
                     </div>
                   </div>
@@ -122,7 +122,7 @@ const Cart = () => {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${getCartTotal().toLocaleString()}</span>
+                  <span>Rs.{getCartTotal().toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
@@ -130,12 +130,12 @@ const Cart = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${(getCartTotal() * 0.08).toLocaleString()}</span>
+                  <span>Rs.{(getCartTotal() * 0.08).toLocaleString()}</span>
                 </div>
                 <div className="border-t border-gray-700 pt-3">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="text-[#d4af37]">${(getCartTotal() * 1.08).toLocaleString()}</span>
+                    <span className="text-[#d4af37]">Rs.{(getCartTotal() * 1.08).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -145,7 +145,6 @@ const Cart = () => {
               </Button>
 
               <div className="text-center text-sm text-gray-400">
-                <p>Free shipping on orders over $500</p>
                 <p>30-day return policy</p>
               </div>
             </div>

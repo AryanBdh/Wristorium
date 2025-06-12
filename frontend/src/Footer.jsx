@@ -13,8 +13,8 @@ const Footer = () => {
 
   return (
     <>
-      <footer className=" mt-15 mb-0 pt-16  border-t border-gray-800 ">
-        <div data-aos="fade-up" data-aos-once="true" className="max-w-7xl mx-auto">
+      <footer className="mb-0 pt-16  border-t border-gray-800 bg-[#162337]">
+        <div data-aos="fade-up" data-aos-once="true" className="max-w-7xl mx-auto py-4 px-4">
           <div className=" grid grid-cols-1 md:grid-cols-4 gap-20 mb-12">
             <div>
               <Link to="/" className="text-xl font-bold text-white mb-6 block">

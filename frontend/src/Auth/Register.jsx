@@ -254,7 +254,7 @@ const Register = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        placeholder="John"
+                        placeholder="Ram"
                         className={`pl-10 ${getFieldClassName("firstName")}`}
                         aria-invalid={errors.firstName && touched.firstName ? "true" : "false"}
                         aria-describedby={errors.firstName && touched.firstName ? "firstName-error" : undefined}
@@ -286,7 +286,7 @@ const Register = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        placeholder="Doe"
+                        placeholder="Shah"
                         className={getFieldClassName("lastName")}
                         aria-invalid={errors.lastName && touched.lastName ? "true" : "false"}
                         aria-describedby={errors.lastName && touched.lastName ? "lastName-error" : undefined}

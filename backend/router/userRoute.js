@@ -9,6 +9,7 @@ const upI = uploadInstance.upload("users");
 
 userRoute.get('/', userInstance.index);
 userRoute.get("/profile", userInstance.getProfile);
+userRoute.get("/verify-admin", userInstance.verifyAdmin)
 userRoute.get("/:id", userInstance.show);
 userRoute.post("/",upI.single("image"), userInstance.store);
 userRoute.put("/:id", userInstance.update);

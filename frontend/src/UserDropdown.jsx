@@ -183,6 +183,15 @@ const UserDropdown = () => {
                 )}
 
                 <div className="border-t border-gray-800 mt-1 pt-1">
+                  <Link
+                    to="/profile"
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-100 hover:text-[#d4af37] hover:bg-[#1a1f2c] transition cursor-pointer"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <User className="h-4 w-4" />
+                    Profile
+                  </Link>
+
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-[#1a1f2c] transition cursor-pointer"

@@ -11,12 +11,12 @@ const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("overview")
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    dateOfBirth: "1985-06-15",
-    memberSince: "2023-01-15",
+    firstName: "",
+    lastName: "",
+    email: "abc@example.com",
+    phone: "",
+    dateOfBirth: "",
+    memberSince: "",
   })
 
   const [addresses, setAddresses] = useState([
@@ -105,7 +105,7 @@ const UserProfile = () => {
   ]
 
   return (
-    <div className="bg-[#0a0e17] text-white min-h-screen">
+    <div className="bg-[#162337] text-white min-h-screen">
       {/* Header */}
       <div className="bg-[#0f1420] border-b border-gray-800">
         <div className="container mx-auto px-4 py-8">

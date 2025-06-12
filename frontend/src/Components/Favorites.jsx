@@ -23,7 +23,7 @@ const Favorites = () => {
 
   if (favoriteWatches.length === 0) {
     return (
-      <div className="bg-[#0a0e17] text-white min-h-screen">
+      <div className="bg-[#162337] text-white min-h-screen">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-md mx-auto">
             <Heart className="h-16 w-16 mx-auto mb-6 text-gray-400" />
@@ -45,7 +45,7 @@ const Favorites = () => {
   return (
     <>
     <Header />
-      <div className="bg-[#0a0e17] text-white min-h-screen">
+      <div className="bg-[#162337] text-white min-h-screen">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Your Favorites</h1>
@@ -121,11 +121,11 @@ const Favorites = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold text-[#d4af37]">
-                        ${watch.price.toLocaleString()}
+                        Rs.{watch.price.toLocaleString()}
                       </span>
                       {watch.originalPrice && (
                         <span className="text-sm text-gray-400 line-through">
-                          ${watch.originalPrice.toLocaleString()}
+                          Rs.{watch.originalPrice.toLocaleString()}
                         </span>
                       )}
                     </div>

@@ -103,11 +103,7 @@ const Shop = () => {
     }
 
     addToCart(watch)
-    toast.success(`${watch.name} added to cart!`, {
-      id: "cart-success",
-      duration: 3000,
-      icon: "🛒",
-    })
+    
   }
 
   const handleToggleFavorite = (e, watchId) => {
@@ -128,19 +124,19 @@ const Shop = () => {
 
     toggleFavorite(watchId)
 
-    if (isCurrentlyFavorite) {
-      toast.success(`${watch?.name} removed from favorites`, {
-        id: "favorite-removed",
-        duration: 3000,
-        icon: "💔",
-      })
-    } else {
-      toast.success(`${watch?.name} added to favorites!`, {
-        id: "favorite-added",
-        duration: 3000,
-        icon: "❤️",
-      })
-    }
+    // if (isCurrentlyFavorite) {
+    //   toast.success(`${watch?.name} removed from favorites`, {
+    //     id: "favorite-removed",
+    //     duration: 3000,
+    //     icon: "💔",
+    //   })
+    // } else {
+    //   toast.success(`${watch?.name} added to favorites!`, {
+    //     id: "favorite-added",
+    //     duration: 3000,
+    //     icon: "❤️",
+    //   })
+    // }
   }
 
   // Get min and max prices from data
@@ -150,7 +146,7 @@ const Shop = () => {
   return (
     <>
       <Header />
-      <div className="bg-[#0a0e17] text-white min-h-screen">
+      <div className="bg-[#162337] text-white min-h-screen">
         {/* Hero Section */}
         <section className="relative h-[30vh] overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
@@ -392,10 +388,10 @@ const Shop = () => {
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-[#d4af37]">${watch.price.toLocaleString()}</span>
+                        <span className="text-xl font-bold text-[#d4af37]">Rs.{watch.price.toLocaleString()}</span>
                         {watch.originalPrice && (
                           <span className="text-sm text-gray-400 line-through">
-                            ${watch.originalPrice.toLocaleString()}
+                            Rs.{watch.originalPrice.toLocaleString()}
                           </span>
                         )}
                       </div>
