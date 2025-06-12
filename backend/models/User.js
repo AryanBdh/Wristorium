@@ -18,6 +18,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    gender:{
+        type: String,
+        enum: ["male", "female"], 
+    },
+    role: {
+        type: String,
+        enum: ["user", "admin"],
+        default: "user",
+    },
     image: {
         type: String,
     }
@@ -54,7 +63,8 @@ userSchema.methods.comparePassword = function (password) {
 userSchema.methods.generateToken = function () {
     let secret = process.env.JWT_SECRET;
     let expiresDate = process.env.JWT_EXPIRES_IN;
-    return jwt.sign({ id: this._id}, secret, {
+    return jwt.sign({ id: this._id, role: this.role },
+         secret, {
         expiresIn: expiresDate,
     });
 };

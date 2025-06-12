@@ -4,12 +4,11 @@ import Product from "../models/Product.js"
 class ProductController {
   async index(req, res) {
     try {
-      const { category, collection, sort, limit = 50, page = 1 } = req.query
+      const { category, sort, limit = 50, page = 1 } = req.query
 
       // Build query
       const query = {}
       if (category) query.category = category
-      if (collection) query.collection = collection
 
       // Build sort options
       let sortOptions = {}
