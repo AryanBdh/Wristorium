@@ -109,11 +109,7 @@ const WomensCollection = () => {
     }
 
     addToCart(watch)
-    toast.success(`${watch.name} added to cart!`, {
-      id: "cart-success",
-      duration: 3000,
-      icon: "🛒",
-    })
+    
   }
 
   const handleToggleFavorite = (e, watchId) => {
@@ -129,24 +125,11 @@ const WomensCollection = () => {
       return
     }
 
-    const watch = womensWatches.find((w) => w.id === watchId)
-    const isCurrentlyFavorite = isFavorite(watchId)
+   
 
     toggleFavorite(watchId)
 
-    if (isCurrentlyFavorite) {
-      toast.success(`${watch?.name} removed from favorites`, {
-        id: "favorite-removed",
-        duration: 3000,
-        icon: "💔",
-      })
-    } else {
-      toast.success(`${watch?.name} added to favorites!`, {
-        id: "favorite-added",
-        duration: 3000,
-        icon: "❤️",
-      })
-    }
+    
   }
 
   // Get min and max prices from women's watches
@@ -211,7 +194,7 @@ const WomensCollection = () => {
           </div>
         )}
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Search and Filter Bar */}
           <div className="mb-8">
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-6">

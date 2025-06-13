@@ -86,6 +86,7 @@ const UserDropdown = () => {
   const isLoggedIn = !!user;
   const isAdmin = user?.role === "admin";
 
+
   return (
     <>
       <div className="relative" ref={dropdownRef}>
@@ -96,19 +97,24 @@ const UserDropdown = () => {
             className="focus:outline-none"
           >
             {isLoggedIn ? (
-              // Logged in user - show avatar with initials
-              <div className="w-8 h-8 bg-[#d4af37] rounded-full flex items-center justify-center text-black font-semibold text-sm hover:bg-[#b8973a] transition-colors">
-                {user.image ? (
-                  <img
-                    src={user.image || "/placeholder.svg"}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  getInitials(user.name)
-                )}
-              </div>
-            ) : (
+            // Logged in user - show avatar with initials or profile image
+            <div className="w-8 h-8 bg-[#B1976B] rounded-full flex items-center justify-center text-black font-semibold text-sm hover:bg-[#b8973a] transition-colors overflow-hidden">
+              {user.image ? (
+                <img
+                  src={user.image || "/placeholder.svg"}
+                  alt={user.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null
+                    e.target.style.display = "none"
+                    e.target.parentNode.textContent = getInitials(user.name)
+                  }}
+                />
+              ) : (
+                getInitials(user.name)
+              )}
+            </div>
+          ) : (
               // Not logged in - show user icon
               <User className="h-5 w-5 text-gray-300 hover:text-[#d4af37] transition cursor-pointer" />
             )}

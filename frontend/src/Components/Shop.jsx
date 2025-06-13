@@ -18,7 +18,7 @@ const Shop = () => {
   // State management
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [priceRange, setPriceRange] = useState([0, 5000])
+  const [priceRange, setPriceRange] = useState([0, 20000])
   const [sortBy, setSortBy] = useState("featured")
   const [viewMode, setViewMode] = useState("grid")
   const [currentPage, setCurrentPage] = useState(1)
@@ -94,7 +94,6 @@ const Shop = () => {
         filtered.sort((a, b) => (b.isNewProduct ? 1 : 0) - (a.isNewProduct ? 1 : 0))
         break
       default:
-        // Featured - keep original order
         break
     }
 
@@ -132,11 +131,7 @@ const Shop = () => {
     }
 
     addToCart(watch)
-    toast.success(`${watch.name} added to cart!`, {
-      id: "cart-success",
-      duration: 3000,
-      icon: "🛒",
-    })
+    
   }
 
   const handleToggleFavorite = (e, watchId) => {
@@ -152,24 +147,8 @@ const Shop = () => {
       return
     }
 
-    const watch = products.find((w) => (w._id || w.id) === watchId)
-    const isCurrentlyFavorite = isFavorite(watchId)
-
     toggleFavorite(watchId)
 
-    if (isCurrentlyFavorite) {
-      toast.success(`${watch?.name} removed from favorites`, {
-        id: "favorite-removed",
-        duration: 3000,
-        icon: "💔",
-      })
-    } else {
-      toast.success(`${watch?.name} added to favorites!`, {
-        id: "favorite-added",
-        duration: 3000,
-        icon: "❤️",
-      })
-    }
   }
 
   // Get min and max prices from data
@@ -179,7 +158,7 @@ const Shop = () => {
   return (
     <>
       <Header />
-      <div className="bg-[#0a0e17] text-white min-h-screen">
+      <div className="bg-[#162337] text-white min-h-screen">
         {/* Hero Section */}
         <section className="relative h-[30vh] overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
@@ -190,7 +169,7 @@ const Shop = () => {
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Login Notice for Non-Authenticated Users */}
           {!isLoggedIn() && (
             <div className="mb-6 p-4 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg">
@@ -310,7 +289,7 @@ const Shop = () => {
                     {/* Price Range */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium mb-2">
-                        Price Range: ${priceRange[0]} - ${priceRange[1]}
+                        Price Range: Rs.{priceRange[0]} - Rs.{priceRange[1]}
                       </label>
                       <div className="flex gap-2">
                         <input
@@ -447,10 +426,10 @@ const Shop = () => {
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-xl font-bold text-[#d4af37]">${product.price.toLocaleString()}</span>
+                            <span className="text-xl font-bold text-[#d4af37]">Rs.{product.price.toLocaleString()}</span>
                             {product.originalPrice && (
                               <span className="text-sm text-gray-400 line-through">
-                                ${product.originalPrice.toLocaleString()}
+                                Rs.{product.originalPrice.toLocaleString()}
                               </span>
                             )}
                           </div>

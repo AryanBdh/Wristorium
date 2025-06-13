@@ -12,7 +12,7 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <div className="bg-[#162337] text-white min-h-screen">
-        <div className="container mx-auto px-4 py-16">
+        <div className="max-w-7xl mx-auto px-4 py-16">
           <div className="text-center max-w-md mx-auto">
             <ShoppingBag className="h-16 w-16 mx-auto mb-6 text-gray-400" />
             <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
@@ -32,7 +32,7 @@ const Cart = () => {
     <>
     <Header />
     <div className="bg-[#162337] text-white min-h-screen">
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Shopping Cart</h1>
           <p className="text-gray-400">
@@ -43,29 +43,29 @@ const Cart = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {cartItems.map((item) => (
-              <div key={item.id} className="bg-[#0f1420] rounded-lg p-6 flex gap-4">
+            {cartItems.map((product) => (
+              <div key={product.id} className="bg-[#0f1420] rounded-lg p-6 flex gap-4">
                 <img
-                  src={item.image || "/placeholder.svg"}
-                  alt={item.name}
+                  src={product.mainImage|| product.images?.[0] || "https://via.placeholder.com/200x200"}
+                  alt={product.name}
                   className="w-24 h-24 object-cover rounded"
                 />
 
                 <div className="flex-1">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg">{item.name}</h3>
+                    <h3 className="font-semibold text-lg">{product.name}</h3>
                     <button
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(product.id)}
                       className="text-gray-400 hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
 
-                  <p className="text-sm text-gray-400 mb-3 capitalize">{item.collection} Collection</p>
+                  <p className="text-sm text-gray-400 mb-3 capitalize">{product.collection} Collection</p>
 
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {item.features.slice(0, 2).map((feature, index) => (
+                    {product.features.slice(0, 2).map((feature, index) => (
                       <span key={index} className="text-xs bg-[#1a1f2c] text-gray-300 px-2 py-1 rounded">
                         {feature}
                       </span>
@@ -75,14 +75,14 @@ const Cart = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(product.id, product.quantity - 1)}
                         className="p-1 bg-[#1a1f2c] hover:bg-[#2a2f3c] rounded transition-colors"
                       >
                         <Minus className="h-4 w-4" />
                       </button>
-                      <span className="w-8 text-center">{item.quantity}</span>
+                      <span className="w-8 text-center">{product.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(product.id, product.quantity + 1)}
                         className="p-1 bg-[#1a1f2c] hover:bg-[#2a2f3c] rounded transition-colors"
                       >
                         <Plus className="h-4 w-4" />
@@ -91,10 +91,10 @@ const Cart = () => {
 
                     <div className="text-right">
                       <div className="text-lg font-bold text-[#d4af37]">
-                        Rs.{(item.price * item.quantity).toLocaleString()}
+                        Rs.{(product.price * product.quantity).toLocaleString()}
                       </div>
-                      {item.quantity > 1 && (
-                        <div className="text-sm text-gray-400">Rs.{item.price.toLocaleString()} each</div>
+                      {product.quantity > 1 && (
+                        <div className="text-sm text-gray-400">Rs.{product.price.toLocaleString()} each</div>
                       )}
                     </div>
                   </div>

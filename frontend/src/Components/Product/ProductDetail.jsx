@@ -147,7 +147,7 @@ const ProductDetail = () => {
       <Header />
       <div className="bg-[#0a0e17] text-white min-h-screen">
         {/* Breadcrumb */}
-        <div className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <nav className="flex items-center space-x-2 text-sm text-gray-400">
             <Link to="/" className="hover:text-[#d4af37]">
               Home
@@ -163,7 +163,7 @@ const ProductDetail = () => {
 
         {/* Login Notice for Non-Authenticated Users */}
         {!isLoggedIn() && (
-          <div className="container mx-auto px-4 mb-6">
+          <div className="max-w-7xl mx-auto px-4 mb-6">
             <div className="p-4 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-[#d4af37] rounded-full flex items-center justify-center">
@@ -187,7 +187,7 @@ const ProductDetail = () => {
           </div>
         )}
 
-        <div className="container mx-auto px-4 pb-16">
+        <div className="max-w-7xl mx-auto px-4 pb-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
             {/* Product Images */}
             <div className="space-y-4">

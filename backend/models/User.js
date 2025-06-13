@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
     }
 },{
     versionKey: false,
+    timestamps: true,
 });
 
 
@@ -50,7 +51,7 @@ userSchema.methods.toJSON = function () {
     if(obj.image){
         obj.image = `${process.env.PUBLIC_URL}/users/${obj.image}`;
     }else{
-        obj.image = `${process.env.PUBLIC_URL}/icons/download.jpg`;
+        obj.image = "";
     }
     delete obj.password;
     return obj;

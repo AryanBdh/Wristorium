@@ -129,24 +129,11 @@ const MensCollection = () => {
       return
     }
 
-    const watch = mensWatches.find((w) => w.id === watchId)
-    const isCurrentlyFavorite = isFavorite(watchId)
+    
 
     toggleFavorite(watchId)
 
-    if (isCurrentlyFavorite) {
-      toast.success(`${watch?.name} removed from favorites`, {
-        id: "favorite-removed",
-        duration: 3000,
-        icon: "💔",
-      })
-    } else {
-      toast.success(`${watch?.name} added to favorites!`, {
-        id: "favorite-added",
-        duration: 3000,
-        icon: "❤️",
-      })
-    }
+    
   }
 
   // Get min and max prices from men's watches
@@ -207,7 +194,7 @@ const MensCollection = () => {
           </div>
         )}
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Search and Filter Bar */}
           <div className="mb-8">
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-6">

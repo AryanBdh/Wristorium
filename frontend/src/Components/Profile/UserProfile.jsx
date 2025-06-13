@@ -108,7 +108,7 @@ const UserProfile = () => {
     <div className="bg-[#162337] text-white min-h-screen">
       {/* Header */}
       <div className="bg-[#0f1420] border-b border-gray-800">
-        <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2">My Account</h1>
@@ -122,7 +122,7 @@ const UserProfile = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
@@ -245,7 +245,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-[#0f1420] rounded-lg p-6 text-center">
                     <Package className="h-8 w-8 text-[#d4af37] mx-auto mb-3" />
                     <div className="text-2xl font-bold mb-1">{orders.length}</div>
@@ -255,11 +255,6 @@ const UserProfile = () => {
                     <Heart className="h-8 w-8 text-[#d4af37] mx-auto mb-3" />
                     <div className="text-2xl font-bold mb-1">12</div>
                     <div className="text-sm text-gray-400">Favorites</div>
-                  </div>
-                  <div className="bg-[#0f1420] rounded-lg p-6 text-center">
-                    <Star className="h-8 w-8 text-[#d4af37] mx-auto mb-3" />
-                    <div className="text-2xl font-bold mb-1">Premium</div>
-                    <div className="text-sm text-gray-400">Member Status</div>
                   </div>
                 </div>
 

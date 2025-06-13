@@ -85,7 +85,7 @@ const Contact = () => {
 
         {/* Contact Form and Info */}
         <section className="py-20 container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
             {/* Contact Form */}
             <div className="bg-[#0F172A] rounded-lg p-8">
               <div className="mb-8">
@@ -260,7 +260,7 @@ const Contact = () => {
               <h2 className="text-3xl font-bold mt-2">Quick Answers</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
               <div className="bg-[#0F172A] rounded-lg p-6">
                 <h3 className="font-semibold mb-3">
                   How long does shipping take?
