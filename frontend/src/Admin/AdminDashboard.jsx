@@ -681,7 +681,7 @@ const AdminDashboard = () => {
 
                       <div className="flex justify-between items-center mb-3">
                         <span className="font-bold text-[#d4af37]">
-                          ${product.price?.toLocaleString() || 0}
+                          Rs.{product.price?.toLocaleString() || 0}
                         </span>
                         <span className="text-sm text-gray-400">
                           Stock: {product.stock || 0}

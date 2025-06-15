@@ -13,7 +13,7 @@ import toast from "react-hot-toast"
 
 const Shop = () => {
   const { addToCart } = useCart()
-  const { toggleFavorite, isFavorite } = useFavorites()
+  const { toggleFavorite, isFavorite, isLoaded } = useFavorites()
 
   // State management
   const [searchTerm, setSearchTerm] = useState("")
@@ -155,6 +155,7 @@ const Shop = () => {
   const minPrice = products.length > 0 ? Math.min(...products.map((watch) => watch.price)) : 0
   const maxPrice = products.length > 0 ? Math.max(...products.map((watch) => watch.price)) : 5000
 
+  
   return (
     <>
       <Header />

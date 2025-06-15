@@ -438,8 +438,8 @@ const AddProduct = () => {
     <>
       <div className="bg-[#162337] text-white min-h-screen">
         {/* Header */}
-        <div className="bg-[#0f1420] border-b border-gray-800">
-          <div className="container mx-auto px-4 py-6">
+        <div className="bg-[#0f1420] border-b border-gray-800 sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Button onClick={() => navigate("/admin/dashboard")} variant="outline" className="border-gray-600">
@@ -456,7 +456,7 @@ const AddProduct = () => {
         </div>
 
         <div className="container mx-auto px-4 py-8">
-          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8" noValidate>
+          <form onSubmit={handleSubmit} className="max-w-7xl mx-auto space-y-8" noValidate>
             {errors.submit && (
               <div className="p-4 bg-red-900/20 border border-red-700 rounded-lg flex items-center gap-3">
                 <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />

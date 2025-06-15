@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
 import {
   Heart,
@@ -18,7 +18,6 @@ import {
 import Button from "../../ui/Button"
 import { useCart } from "../../context/CartContext"
 import { useFavorites } from "../../context/FavouritesContext"
-import watchesData from "../../data/watches.json"
 import Header from "../../Header"
 import toast from "react-hot-toast"
 
@@ -27,9 +26,10 @@ const ProductDetail = () => {
   const { addToCart } = useCart()
   const { toggleFavorite, isFavorite } = useFavorites()
 
-  // Find the product by ID
-  const product = watchesData.find((watch) => watch.id === Number.parseInt(id))
-
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [relatedProducts, setRelatedProducts] = useState([])
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("description")
@@ -41,26 +41,158 @@ const ProductDetail = () => {
     return token && user
   }
 
-  if (!product) {
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        console.log("Fetching product with ID:", id)
+
+        // Try to fetch from database first
+        const productResponse = await fetch(`http://localhost:3000/products/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+
+        console.log("Product response status:", productResponse.status)
+
+        if (productResponse.ok) {
+          const productData = await productResponse.json()
+          console.log("✅ Successfully fetched product from database:", productData)
+          setProduct(productData)
+
+          // Fetch related products from the same collection
+          if (productData.collection) {
+            try {
+              const relatedResponse = await fetch(
+                `http://localhost:3000/products?collection=${encodeURIComponent(productData.collection)}&limit=5`,
+              )
+
+              if (relatedResponse.ok) {
+                const relatedData = await relatedResponse.json()
+                console.log("Related products from database:", relatedData)
+                // Filter out the current product from related products
+                const filtered = relatedData.products?.filter((p) => p._id !== productData._id) || []
+                setRelatedProducts(filtered.slice(0, 4))
+              }
+            } catch (relatedError) {
+              console.warn("Failed to fetch related products:", relatedError)
+            }
+          }
+        } else {
+          throw new Error(`Database product not found (${productResponse.status})`)
+        }
+      } catch (error) {
+        console.error("❌ Error fetching from database:", error)
+        console.log("🔄 Attempting fallback to static data...")
+
+        // Import static data dynamically to avoid issues
+        try {
+          const { default: watchesData } = await import("../../data/watches.json")
+          const fallbackProduct = watchesData.find((watch) => watch.id === Number.parseInt(id))
+
+          if (fallbackProduct) {
+            console.log("✅ Found fallback product in static data:", fallbackProduct)
+            setProduct(fallbackProduct)
+
+            // Get related products from static data
+            const fallbackRelated = watchesData
+              .filter((watch) => watch.collection === fallbackProduct.collection && watch.id !== fallbackProduct.id)
+              .slice(0, 4)
+            setRelatedProducts(fallbackRelated)
+          } else {
+            console.log("❌ No fallback product found for ID:", id)
+            setError("Product not found in database or static data")
+          }
+        } catch (staticError) {
+          console.error("❌ Error loading static data:", staticError)
+          setError("Failed to load product data")
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchProduct()
+    }
+  }, [id])
+
+  if (loading) {
     return (
-      <div className="bg-[#0a0e17] text-white min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-          <Link to="/shop">
-            <Button className="bg-[#d4af37] hover:bg-[#b8973a] text-black">Back to Shop</Button>
-          </Link>
+      <>
+        <Header />
+        <div className="bg-[#0a0e17] text-white min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4af37] mx-auto mb-4"></div>
+            <h1 className="text-2xl font-bold">Loading Product...</h1>
+            <p className="text-gray-400 mt-2">Fetching from database...</p>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
-  // Mock additional images for the gallery
-  const productImages = [
-    product.image,
-    "https://via.placeholder.com/600x600?text=Side+View",
-    "https://via.placeholder.com/600x600?text=Back+View",
-    "https://via.placeholder.com/600x600?text=Detail+View",
-  ]
+  if (error || !product) {
+    return (
+      <>
+        <Header />
+        <div className="bg-[#0a0e17] text-white min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">{error || "Product Not Found"}</h1>
+            <p className="text-gray-400 mb-6">
+              {error?.includes("database")
+                ? "Could not fetch product from database or static data"
+                : "This product doesn't exist"}
+            </p>
+            <Link to="/shop">
+              <Button className="bg-[#d4af37] hover:bg-[#b8973a] text-black">Back to Shop</Button>
+            </Link>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  // Determine if this is a database product or static product
+  const isDatabaseProduct = product._id !== undefined
+  const productId = isDatabaseProduct ? product._id : product.id
+
+  console.log("📊 Product source:", isDatabaseProduct ? "DATABASE" : "STATIC DATA")
+  console.log("📊 Product ID:", productId)
+
+  // Handle images based on product source
+  const productImages = (() => {
+    if (isDatabaseProduct) {
+      // Database product - use uploaded images
+      if (product.images && product.images.length > 0) {
+        return product.images.map((img) => {
+          // Check if it's already a full URL
+          if (img.startsWith("http")) {
+            return img
+          }
+          return `http://localhost:3000/products/${img}`
+        })
+      } else if (product.mainImage) {
+        const mainImg = product.mainImage.startsWith("http")
+          ? product.mainImage
+          : `http://localhost:3000/products/${product.mainImage}`
+        return [mainImg]
+      } else {
+        return ["/placeholder.svg?height=600&width=600"]
+      }
+    } else {
+      // Static product - use static image
+      return [
+        product.image || "/placeholder.svg?height=600&width=600",
+        "/placeholder.svg?height=600&width=600&text=Side+View",
+        "/placeholder.svg?height=600&width=600&text=Back+View",
+        "/placeholder.svg?height=600&width=600&text=Detail+View",
+      ]
+    }
+  })()
 
   const handleAddToCart = () => {
     if (!isLoggedIn()) {
@@ -76,11 +208,7 @@ const ProductDetail = () => {
       addToCart(product)
     }
 
-    toast.success(`${product.name} added to cart!`, {
-      id: "cart-success",
-      duration: 3000,
-      icon: "🛒",
-    })
+    
   }
 
   const handleToggleFavorite = () => {
@@ -93,59 +221,23 @@ const ProductDetail = () => {
       return
     }
 
-    const isCurrentlyFavorite = isFavorite(product.id)
-    toggleFavorite(product.id, product.name)
+    const isCurrentlyFavorite = isFavorite(productId)
+    toggleFavorite(productId, product)
 
-    if (isCurrentlyFavorite) {
-      toast.success(`${product.name} removed from favorites`, {
-        id: "favorite-removed",
-        duration: 3000,
-        icon: "💔",
-      })
-    } else {
-      toast.success(`${product.name} added to favorites!`, {
-        id: "favorite-added",
-        duration: 3000,
-        icon: "❤️",
-      })
-    }
+    
   }
-
-  const relatedProducts = watchesData
-    .filter((watch) => watch.collection === product.collection && watch.id !== product.id)
-    .slice(0, 4)
-
-  const reviews = [
-    {
-      id: 1,
-      name: "John Smith",
-      rating: 5,
-      date: "2024-01-10",
-      comment: "Absolutely stunning timepiece. The craftsmanship is exceptional and it feels premium on the wrist.",
-      verified: true,
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      rating: 5,
-      date: "2024-01-05",
-      comment: "Perfect gift for my husband. He loves the design and the quality is outstanding.",
-      verified: true,
-    },
-    {
-      id: 3,
-      name: "Michael Chen",
-      rating: 4,
-      date: "2023-12-28",
-      comment: "Great watch, exactly as described. Fast shipping and excellent packaging.",
-      verified: true,
-    },
-  ]
 
   return (
     <>
       <Header />
-      <div className="bg-[#0a0e17] text-white min-h-screen">
+      <div className="bg-[#162337] text-white min-h-screen">
+        {/* Debug Info - Remove in production */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="bg-blue-900/20 text-blue-300 p-2 text-xs text-center">
+            📊 Product Source: {isDatabaseProduct ? "DATABASE" : "STATIC DATA"} | ID: {productId}
+          </div>
+        )}
+
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-4 py-6">
           <nav className="flex items-center space-x-2 text-sm text-gray-400">
@@ -194,26 +286,34 @@ const ProductDetail = () => {
               {/* Main Image */}
               <div className="relative bg-[#0f1420] rounded-lg overflow-hidden">
                 <img
-                  src={productImages[selectedImage] || "/placeholder.svg"}
+                  src={productImages[selectedImage] || "/placeholder.svg?height=600&width=600"}
                   alt={product.name}
                   className="w-full aspect-square object-cover"
+                  onError={(e) => {
+                    console.log("Image failed to load:", e.target.src)
+                    e.target.src = "/placeholder.svg?height=600&width=600"
+                  }}
                 />
 
                 {/* Image Navigation */}
-                <button
-                  onClick={() => setSelectedImage(Math.max(0, selectedImage - 1))}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
-                  disabled={selectedImage === 0}
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setSelectedImage(Math.min(productImages.length - 1, selectedImage + 1))}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
-                  disabled={selectedImage === productImages.length - 1}
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
+                {productImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setSelectedImage(Math.max(0, selectedImage - 1))}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+                      disabled={selectedImage === 0}
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setSelectedImage(Math.min(productImages.length - 1, selectedImage + 1))}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+                      disabled={selectedImage === productImages.length - 1}
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
 
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -227,36 +327,33 @@ const ProductDetail = () => {
               </div>
 
               {/* Thumbnail Images */}
-              <div className="grid grid-cols-4 gap-3">
-                {productImages.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative bg-[#0f1420] rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImage === index ? "border-[#d4af37]" : "border-transparent hover:border-gray-600"
-                    }`}
-                  >
-                    <img
-                      src={image || "/placeholder.svg"}
-                      alt={`${product.name} view ${index + 1}`}
-                      className="w-full aspect-square object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+              {productImages.length > 1 && (
+                <div className="grid grid-cols-4 gap-3">
+                  {productImages.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`relative bg-[#0f1420] rounded-lg overflow-hidden border-2 transition-colors ${
+                        selectedImage === index ? "border-[#d4af37]" : "border-transparent hover:border-gray-600"
+                      }`}
+                    >
+                      <img
+                        src={image || "/placeholder.svg?height=150&width=150"}
+                        alt={`${product.name} view ${index + 1}`}
+                        className="w-full aspect-square object-cover"
+                        onError={(e) => {
+                          e.target.src = "/placeholder.svg?height=150&width=150"
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Product Info */}
             <div className="space-y-6">
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[#d4af37] text-sm uppercase tracking-wider">
-                    {product.collection} Collection
-                  </span>
-                  {product.features.includes("Limited Edition") && (
-                    <span className="bg-purple-900/20 text-purple-400 text-xs px-2 py-1 rounded">Limited Edition</span>
-                  )}
-                </div>
                 <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.name}</h1>
 
                 {/* Rating */}
@@ -268,22 +365,22 @@ const ProductDetail = () => {
                         <Star
                           key={i}
                           className={`h-5 w-5 ${
-                            i < Math.floor(product.rating) ? "text-[#d4af37] fill-current" : "text-gray-600"
+                            i < Math.floor(product.rating || 4.5) ? "text-[#d4af37] fill-current" : "text-gray-600"
                           }`}
                         />
                       ))}
                   </div>
                   <span className="text-sm text-gray-400">
-                    {product.rating} ({product.reviews} reviews)
+                    {product.rating || 4.5} ({product.reviews || 20} reviews)
                   </span>
                 </div>
 
                 {/* Price */}
                 <div className="flex items-center gap-4 mb-6">
-                  <span className="text-3xl font-bold text-[#d4af37]">Rs.{product.price.toLocaleString()}</span>
+                  <span className="text-3xl font-bold text-[#d4af37]">${product.price?.toLocaleString()}</span>
                   {product.originalPrice && (
                     <span className="text-xl text-gray-400 line-through">
-                      Rs.{product.originalPrice.toLocaleString()}
+                      ${product.originalPrice?.toLocaleString()}
                     </span>
                   )}
                 </div>
@@ -292,17 +389,35 @@ const ProductDetail = () => {
               </div>
 
               {/* Features */}
-              <div>
-                <h3 className="font-semibold mb-3">Key Features</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {product.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-[#d4af37] rounded-full"></div>
-                      <span className="text-sm text-gray-300">{feature}</span>
-                    </div>
-                  ))}
+              {product.features && product.features.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3">Key Features</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {product.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-[#d4af37] rounded-full"></div>
+                        <span className="text-sm text-gray-300">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Stock Info for Database Products */}
+              {isDatabaseProduct && product.stock !== undefined && (
+                <div className="p-3 bg-[#0f1420] rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Stock:</span>
+                    <span
+                      className={`text-sm font-medium ${
+                        product.stock > 10 ? "text-green-400" : product.stock > 0 ? "text-yellow-400" : "text-red-400"
+                      }`}
+                    >
+                      {product.stock > 0 ? `${product.stock} available` : "Out of stock"}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Quantity and Actions */}
               <div className="space-y-4">
@@ -320,6 +435,7 @@ const ProductDetail = () => {
                       <button
                         onClick={() => setQuantity(quantity + 1)}
                         className="p-2 hover:bg-[#1a1f2c] transition-colors"
+                        disabled={isDatabaseProduct && product.stock && quantity >= product.stock}
                       >
                         <Plus className="h-4 w-4" />
                       </button>
@@ -331,29 +447,36 @@ const ProductDetail = () => {
                   <Button
                     onClick={handleAddToCart}
                     className={`flex-1 bg-[#d4af37] hover:bg-[#b8973a] text-black py-6 text-lg font-semibold ${
-                      !isLoggedIn() ? "opacity-60 cursor-not-allowed" : ""
+                      !isLoggedIn() || (isDatabaseProduct && product.stock === 0) ? "opacity-60 cursor-not-allowed" : ""
                     }`}
-                    disabled={!isLoggedIn()}
-                    title={!isLoggedIn() ? "Please log in to add to cart" : "Add to cart"}
+                    disabled={!isLoggedIn() || (isDatabaseProduct && product.stock === 0)}
+                    title={
+                      !isLoggedIn()
+                        ? "Please log in to add to cart"
+                        : isDatabaseProduct && product.stock === 0
+                          ? "Out of stock"
+                          : "Add to cart"
+                    }
                   >
                     <ShoppingBag className="h-5 w-5 mr-2" />
-                    {!isLoggedIn() ? "Login to Add to Cart" : "Add to Cart"}
+                    {!isLoggedIn()
+                      ? "Login to Add to Cart"
+                      : isDatabaseProduct && product.stock === 0
+                        ? "Out of Stock"
+                        : "Add to Cart"}
                   </Button>
                   <Button
                     onClick={handleToggleFavorite}
                     variant="outline"
                     className={`px-6 py-6 border-gray-600 ${
-                      isFavorite(product.id) && isLoggedIn()
+                      isFavorite(productId) && isLoggedIn()
                         ? "bg-red-600 border-red-600 text-white"
                         : "hover:bg-gray-800"
                     } ${!isLoggedIn() ? "opacity-60 cursor-not-allowed" : ""}`}
                     disabled={!isLoggedIn()}
                     title={!isLoggedIn() ? "Please log in to add to favorites" : "Add to favorites"}
                   >
-                    <Heart className={`h-5 w-5 ${isFavorite(product.id) && isLoggedIn() ? "fill-current" : ""}`} />
-                  </Button>
-                  <Button variant="outline" className="px-6 py-6 border-gray-600 hover:bg-gray-800">
-                    <Share2 className="h-5 w-5" />
+                    <Heart className={`h-5 w-5 ${isFavorite(productId) && isLoggedIn() ? "fill-current" : ""}`} />
                   </Button>
                 </div>
               </div>
@@ -392,7 +515,7 @@ const ProductDetail = () => {
                 {[
                   { id: "description", label: "Description" },
                   { id: "specifications", label: "Specifications" },
-                  { id: "reviews", label: `Reviews (${reviews.length})` },
+                  { id: "reviews", label: `Reviews (${product.reviews || 2})` },
                   { id: "shipping", label: "Shipping & Returns" },
                 ].map((tab) => (
                   <button
@@ -420,11 +543,7 @@ const ProductDetail = () => {
                       craftsmanship with modern innovation. Each timepiece is meticulously assembled by master
                       watchmakers in our Geneva workshop, ensuring the highest standards of quality and precision.
                     </p>
-                    <p className="text-gray-300 leading-relaxed">
-                      This exceptional watch features premium materials including 316L stainless steel case, sapphire
-                      crystal glass, and genuine leather strap. The movement is precision-engineered to provide accurate
-                      timekeeping for years to come.
-                    </p>
+                    <p className="text-gray-300 leading-relaxed">{product.description}</p>
                   </div>
 
                   <div>
@@ -445,55 +564,94 @@ const ProductDetail = () => {
                   <div>
                     <h3 className="text-xl font-semibold mb-4">Technical Specifications</h3>
                     <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Case Material:</span>
-                        <span>316L Stainless Steel</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Case Diameter:</span>
-                        <span>42mm</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Case Thickness:</span>
-                        <span>12mm</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Crystal:</span>
-                        <span>Sapphire Crystal</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Water Resistance:</span>
-                        <span>100m / 330ft</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Movement:</span>
-                        <span>Swiss Automatic</span>
-                      </div>
+                      {isDatabaseProduct && product.materials ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Case Material:</span>
+                            <span>{product.materials.case || "316L Stainless Steel"}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Crystal:</span>
+                            <span>{product.materials.crystal || "Sapphire Crystal"}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Movement:</span>
+                            <span>{product.materials.movement || "Swiss Automatic"}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Strap Material:</span>
+                            <span>{product.materials.strap || "Genuine Leather"}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Case Material:</span>
+                            <span>316L Stainless Steel</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Crystal:</span>
+                            <span>Sapphire Crystal</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Movement:</span>
+                            <span>Swiss Automatic</span>
+                          </div>
+                        </>
+                      )}
+
+                      {isDatabaseProduct && product.dimensions && (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Case Diameter:</span>
+                            <span>{product.dimensions.diameter || 42}mm</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Case Thickness:</span>
+                            <span>{product.dimensions.thickness || 12}mm</span>
+                          </div>
+                        </>
+                      )}
+
+                      {product.weight && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Weight:</span>
+                          <span>{product.weight}g</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div>
                     <h3 className="text-xl font-semibold mb-4">Additional Details</h3>
                     <div className="space-y-3">
+                      {isDatabaseProduct && product.specifications ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Water Resistance:</span>
+                            <span>{product.specifications.waterResistance || "100m / 330ft"}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Power Reserve:</span>
+                            <span>{product.specifications.powerReserve || "42 Hours"}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Water Resistance:</span>
+                            <span>100m / 330ft</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Power Reserve:</span>
+                            <span>42 Hours</span>
+                          </div>
+                        </>
+                      )}
+
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Strap Material:</span>
-                        <span>Genuine Leather</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Strap Width:</span>
-                        <span>22mm</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Clasp Type:</span>
-                        <span>Deployment Buckle</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Power Reserve:</span>
-                        <span>42 Hours</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Weight:</span>
-                        <span>165g</span>
+                        <span className="text-gray-400">Brand:</span>
+                        <span>{product.brand || "WHRISTORIUM"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Origin:</span>
@@ -512,40 +670,8 @@ const ProductDetail = () => {
                       Write a Review
                     </Button>
                   </div>
-
-                  <div className="space-y-6">
-                    {reviews.map((review) => (
-                      <div key={review.id} className="border-b border-gray-800 pb-6 last:border-b-0">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="font-medium">{review.name}</span>
-                              {review.verified && (
-                                <span className="bg-green-900/20 text-green-400 text-xs px-2 py-1 rounded">
-                                  Verified Purchase
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex">
-                                {Array(5)
-                                  .fill(0)
-                                  .map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-4 w-4 ${
-                                        i < review.rating ? "text-[#d4af37] fill-current" : "text-gray-600"
-                                      }`}
-                                    />
-                                  ))}
-                              </div>
-                              <span className="text-sm text-gray-400">{review.date}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-gray-300">{review.comment}</p>
-                      </div>
-                    ))}
+                  <div className="text-center text-gray-400 py-8">
+                    <p>No reviews yet. Be the first to review this product!</p>
                   </div>
                 </div>
               )}
@@ -603,39 +729,53 @@ const ProductDetail = () => {
             <div>
               <h2 className="text-2xl font-bold mb-8">You May Also Like</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {relatedProducts.map((relatedProduct) => (
-                  <Link
-                    key={relatedProduct.id}
-                    to={`/product/${relatedProduct.id}`}
-                    className="group bg-[#0f1420] rounded-lg overflow-hidden hover:bg-[#1a1f2c] transition-colors"
-                  >
-                    <div className="relative">
-                      <img
-                        src={relatedProduct.image || "/placeholder.svg"}
-                        alt={relatedProduct.name}
-                        className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      {relatedProduct.isNew && (
-                        <span className="absolute top-3 left-3 bg-[#d4af37] text-black text-xs px-2 py-1 rounded">
-                          NEW
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-medium mb-2 group-hover:text-[#d4af37] transition-colors">
-                        {relatedProduct.name}
-                      </h3>
-                      <p className="text-sm text-gray-400 mb-2 capitalize">{relatedProduct.collection} Collection</p>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#d4af37]">${relatedProduct.price.toLocaleString()}</span>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-[#d4af37] fill-current" />
-                          <span className="text-sm">{relatedProduct.rating}</span>
+                {relatedProducts.map((relatedProduct) => {
+                  const relatedId = relatedProduct._id || relatedProduct.id
+                  const relatedImage = relatedProduct._id
+                    ? relatedProduct.mainImage
+                      ? `http://localhost:3000/products/${relatedProduct.mainImage}`
+                      : "/placeholder.svg?height=300&width=300"
+                    : relatedProduct.image || "/placeholder.svg?height=300&width=300"
+
+                  return (
+                    <Link
+                      key={relatedId}
+                      to={`/product/${relatedId}`}
+                      className="group bg-[#0f1420] rounded-lg overflow-hidden hover:bg-[#1a1f2c] transition-colors"
+                    >
+                      <div className="relative">
+                        <img
+                          src={relatedImage || "/placeholder.svg"}
+                          alt={relatedProduct.name}
+                          className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            e.target.src = "/placeholder.svg?height=300&width=300"
+                          }}
+                        />
+                        {relatedProduct.isNew && (
+                          <span className="absolute top-3 left-3 bg-[#d4af37] text-black text-xs px-2 py-1 rounded">
+                            NEW
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-medium mb-2 group-hover:text-[#d4af37] transition-colors">
+                          {relatedProduct.name}
+                        </h3>
+                        <p className="text-sm text-gray-400 mb-2 capitalize">
+                          {relatedProduct.collection || "Classic"} Collection
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[#d4af37]">${relatedProduct.price?.toLocaleString()}</span>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 text-[#d4af37] fill-current" />
+                            <span className="text-sm">{relatedProduct.rating || 4.5}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           )}

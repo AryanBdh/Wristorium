@@ -25,18 +25,9 @@ const MobileMenu = () => {
 
   const menuItems = [
     { name: "Shop", href: "/shop" },
-    { name: "Collections", href: "/collections" },
-    { name: "Best Sellers", href: "/best-sellers" },
-    { name: "Men", href: "/men" },
-    { name: "Women", href: "/women" },
-    { name: "Smart", href: "/smart" },
-  ]
-
-  const collections = [
-    { name: "Heritage Collection", href: "/collections/heritage" },
-    { name: "Minimalist Collection", href: "/collections/minimalist" },
-    { name: "Innovation Collection", href: "/collections/innovation" },
-    { name: "Grandeur Collection", href: "/collections/grandeur" },
+    { name: "Men", href: "/collections/men" },
+    { name: "Women", href: "/collections/women" },
+    { name: "Smart", href: "/collections/smart" },
   ]
 
   return (
@@ -61,7 +52,7 @@ const MobileMenu = () => {
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between py-4 px-4 border-b border-gray-800">
             <Link to="/" className="text-xl font-bold text-white" onClick={closeMenu}>
-              <span className="text-[#d4af37]">CHRONO</span>LUXE
+              <span className="text-[#d4af37]">WHRIST</span>ORIUM
             </Link>
             <button
               onClick={closeMenu}
@@ -92,28 +83,11 @@ const MobileMenu = () => {
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-xs uppercase tracking-wider text-gray-400 font-semibold px-4">Collections</h3>
-                <ul className="space-y-1">
-                  {collections.map((collection) => (
-                    <li key={collection.name}>
-                      <Link
-                        to={collection.href}
-                        className="block py-2 px-4 text-base hover:bg-[#1a1f2c] transition-colors"
-                        onClick={closeMenu}
-                      >
-                        {collection.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="space-y-3">
                 <h3 className="text-xs uppercase tracking-wider text-gray-400 font-semibold px-4">Account</h3>
                 <ul className="space-y-1">
                   <li>
                     <Link
-                      to="/account/login"
+                      to="/login"
                       className="block py-2 px-4 text-base hover:bg-[#1a1f2c] transition-colors"
                       onClick={closeMenu}
                     >
@@ -122,7 +96,7 @@ const MobileMenu = () => {
                   </li>
                   <li>
                     <Link
-                      to="/account/register"
+                      to="/register"
                       className="block py-2 px-4 text-base hover:bg-[#1a1f2c] transition-colors"
                       onClick={closeMenu}
                     >
@@ -143,9 +117,6 @@ const MobileMenu = () => {
             </div>
           </nav>
 
-          <div className="border-t border-gray-800 py-4 px-4">
-            <Button className="w-full bg-[#d4af37] hover:bg-[#b8973a] text-black">Shop Now</Button>
-          </div>
         </div>
       </div>
     </div>
