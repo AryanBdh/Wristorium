@@ -762,11 +762,9 @@ const ProductDetail = () => {
                         <h3 className="font-medium mb-2 group-hover:text-[#d4af37] transition-colors">
                           {relatedProduct.name}
                         </h3>
-                        <p className="text-sm text-gray-400 mb-2 capitalize">
-                          {relatedProduct.collection || "Classic"} Collection
-                        </p>
+                        
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-[#d4af37]">${relatedProduct.price?.toLocaleString()}</span>
+                          <span className="font-bold text-[#d4af37]">Rs.{relatedProduct.price?.toLocaleString()}</span>
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 text-[#d4af37] fill-current" />
                             <span className="text-sm">{relatedProduct.rating || 4.5}</span>

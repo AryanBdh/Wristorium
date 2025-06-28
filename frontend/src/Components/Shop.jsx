@@ -18,7 +18,7 @@ const Shop = () => {
   // State management
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [priceRange, setPriceRange] = useState([0, 20000])
+  const [priceRange, setPriceRange] = useState([0, 50000])
   const [sortBy, setSortBy] = useState("featured")
   const [viewMode, setViewMode] = useState("grid")
   const [currentPage, setCurrentPage] = useState(1)
@@ -113,7 +113,7 @@ const Shop = () => {
   const clearFilters = () => {
     setSearchTerm("")
     setSelectedCategory("all")
-    setPriceRange([0, 5000])
+    setPriceRange([0, 50000])
     setSortBy("featured")
   }
 
@@ -153,7 +153,7 @@ const Shop = () => {
 
   // Get min and max prices from data
   const minPrice = products.length > 0 ? Math.min(...products.map((watch) => watch.price)) : 0
-  const maxPrice = products.length > 0 ? Math.max(...products.map((watch) => watch.price)) : 5000
+  const maxPrice = products.length > 0 ? Math.max(...products.map((watch) => watch.price)) : 50000
 
   
   return (
@@ -295,8 +295,8 @@ const Shop = () => {
                       <div className="flex gap-2">
                         <input
                           type="range"
-                          min={minPrice}
-                          max={maxPrice}
+                          min={0}
+                          max={50000}
                           step="50"
                           value={priceRange[0]}
                           onChange={(e) => setPriceRange([Number.parseInt(e.target.value), priceRange[1]])}
@@ -304,8 +304,8 @@ const Shop = () => {
                         />
                         <input
                           type="range"
-                          min={minPrice}
-                          max={maxPrice}
+                          min={0}
+                          max={50000}
                           step="50"
                           value={priceRange[1]}
                           onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
@@ -413,7 +413,6 @@ const Shop = () => {
                           </div>
                         </div>
 
-                        <p className="text-sm text-gray-400 mb-3 capitalize">{product.collection} Collection</p>
 
                         {viewMode === "list" && <p className="text-sm text-gray-300 mb-4">{product.description}</p>}
 
