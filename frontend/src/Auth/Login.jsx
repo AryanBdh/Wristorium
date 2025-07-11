@@ -6,6 +6,7 @@ import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react"
 import Button from "../ui/Button"
 import Input from "../ui/Input"
 import toast from "react-hot-toast"
+import { useCart } from "../context/CartContext" // Import CartContext to clear cart on logout
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const {loadCart} = useCart() 
 
   // Validation rules
   const validateField = (name, value) => {
@@ -63,7 +65,7 @@ const Login = () => {
     }
   }
 
-  const handleBlur = (e) => {
+  const handleBlur = async(e) => {
     const { name, value } = e.target
     setTouched((prev) => ({ ...prev, [name]: true }))
 
@@ -87,7 +89,7 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      const res = await fetch("http://localhost:3000/login", {
+      const res = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -119,7 +121,7 @@ const Login = () => {
       localStorage.setItem("token", data.token)
 
       // Fetch user profile with the token
-      const profileRes = await fetch("http://localhost:3000/user/profile", {
+      const profileRes = await fetch("http://localhost:5000/api/user/profile", {
         headers: {
           Authorization: `Bearer ${data.token}`,
         },
@@ -130,8 +132,9 @@ const Login = () => {
       // Save user profile to localStorage
       localStorage.setItem("user", JSON.stringify(userProfile))
 
+      await loadCart(); // Load cart items after login
+
       toast.success("Login successful! Welcome back.", {
-        icon: "👋",
         id: "login-success",
       })
 

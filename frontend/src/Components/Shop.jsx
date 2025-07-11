@@ -1,19 +1,17 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Search, Filter, Heart, ShoppingBag, Grid, List } from "lucide-react"
+import { Search, Filter, ShoppingBag, Grid, List } from "lucide-react"
 import { Link } from "react-router-dom"
 import Button from "../ui/Button"
 import Input from "../ui/Input"
 import { useCart } from "../context/CartContext"
-import { useFavorites } from "../context/FavouritesContext"
 import watchesData from "../data/watches.json"
 import Header from "../Header"
 import toast from "react-hot-toast"
 
 const Shop = () => {
-  const { addToCart } = useCart()
-  const { toggleFavorite, isFavorite, isLoaded } = useFavorites()
+  const { addToCart, isLoading: cartLoading, isLoaded: cartLoaded } = useCart()
 
   // State management
   const [searchTerm, setSearchTerm] = useState("")
@@ -26,6 +24,7 @@ const Shop = () => {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [dataSource, setDataSource] = useState("static")
 
   const itemsPerPage = 9
 
@@ -34,19 +33,37 @@ const Shop = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await fetch("http://localhost:3000/products")
+        console.log("🔄 Fetching products from API...")
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch products")
+        const response = await fetch("http://localhost:5000/api/products")
+
+        if (response.ok) {
+          const data = await response.json()
+          console.log("✅ API Response:", data)
+
+          // Check different possible response structures
+          if (data.products && Array.isArray(data.products) && data.products.length > 0) {
+            setProducts(data.products)
+            setDataSource("database")
+            console.log("✅ Using database products:", data.products.length)
+          } else if (Array.isArray(data) && data.length > 0) {
+            setProducts(data)
+            setDataSource("database")
+            console.log("✅ Using database products (direct array):", data.length)
+          } else {
+            throw new Error("No products found in database response")
+          }
+        } else {
+          throw new Error(`API request failed: ${response.status}`)
         }
-
-        const data = await response.json()
-        setProducts(data.products || [])
       } catch (error) {
-        console.error("Error fetching products:", error)
+        console.error("❌ Error fetching products:", error)
         setError(error.message)
-        // Fallback to static data if API fails
+
+        // Fallback to static data
+        console.log("📦 Using static data fallback")
         setProducts(watchesData)
+        setDataSource("static")
       } finally {
         setLoading(false)
       }
@@ -66,8 +83,8 @@ const Shop = () => {
   const filteredWatches = useMemo(() => {
     const filtered = products.filter((watch) => {
       const matchesSearch =
-        watch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        watch.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        watch.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        watch.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (watch.features && watch.features.some((feature) => feature.toLowerCase().includes(searchTerm.toLowerCase())))
 
       const matchesCategory = selectedCategory === "all" || watch.category === selectedCategory
@@ -79,13 +96,13 @@ const Shop = () => {
     // Sort logic
     switch (sortBy) {
       case "price-low":
-        filtered.sort((a, b) => a.price - b.price)
+        filtered.sort((a, b) => (a.price || 0) - (b.price || 0))
         break
       case "price-high":
-        filtered.sort((a, b) => b.price - a.price)
+        filtered.sort((a, b) => (b.price || 0) - (a.price || 0))
         break
       case "name":
-        filtered.sort((a, b) => a.name.localeCompare(b.name))
+        filtered.sort((a, b) => (a.name || "").localeCompare(b.name || ""))
         break
       case "rating":
         filtered.sort((a, b) => (b.rating || 4.5) - (a.rating || 4.5))
@@ -117,9 +134,14 @@ const Shop = () => {
     setSortBy("featured")
   }
 
-  const handleAddToCart = (e, watch) => {
+  const handleAddToCart = async (e, watch) => {
     e.preventDefault()
     e.stopPropagation()
+
+    if (!cartLoaded) {
+      toast.error("Please wait, cart is loading...")
+      return
+    }
 
     if (!isLoggedIn()) {
       toast.error("Please log in to add items to your cart", {
@@ -130,32 +152,39 @@ const Shop = () => {
       return
     }
 
-    addToCart(watch)
-    
-  }
+    console.log("🛒 Adding product to cart:", watch)
+    const success = await addToCart(watch, 1)
 
-  const handleToggleFavorite = (e, watchId) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    if (!isLoggedIn()) {
-      toast.error("Please log in to add items to your favorites", {
-        id: "login-required-favorites",
-        duration: 4000,
-        icon: "🔒",
-      })
-      return
+    if (success) {
+      console.log("✅ Successfully added to cart")
+    } else {
+      console.log("❌ Failed to add to cart")
     }
-
-    toggleFavorite(watchId)
-
   }
 
-  // Get min and max prices from data
-  const minPrice = products.length > 0 ? Math.min(...products.map((watch) => watch.price)) : 0
-  const maxPrice = products.length > 0 ? Math.max(...products.map((watch) => watch.price)) : 50000
+  // Get product image URL
+  const getProductImageUrl = (product) => {
+    if (dataSource === "database") {
+      // Database product
+      if (product.mainImage) {
+        // Check if it's already a full URL
+        if (product.mainImage.startsWith("http")) {
+          return product.mainImage
+        }
+        // Construct URL for uploaded image
+        return `http://localhost:5000/products/${product.mainImage}`
+      }
+      // Fallback for database products
+      return "/placeholder.svg?height=300&width=300"
+    } else {
+      // Static product
+      return product.image || "/placeholder.svg?height=300&width=300"
+    }
+  }
 
-  
+  // Get unique categories
+  const categories = ["all", ...new Set(products.map((product) => product.category).filter(Boolean))]
+
   return (
     <>
       <Header />
@@ -171,6 +200,20 @@ const Shop = () => {
         </section>
 
         <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Data Source Indicator */}
+          <div className="mb-4">
+            {dataSource === "database" && (
+              <span className="inline-flex items-center px-3 py-1 bg-green-600 text-white text-sm rounded-full">
+                🔴 LIVE DATA
+              </span>
+            )}
+            {dataSource === "static" && (
+              <span className="inline-flex items-center px-3 py-1 bg-yellow-600 text-white text-sm rounded-full">
+                📦 STATIC DATA
+              </span>
+            )}
+          </div>
+
           {/* Login Notice for Non-Authenticated Users */}
           {!isLoggedIn() && (
             <div className="mb-6 p-4 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg">
@@ -188,7 +231,7 @@ const Shop = () => {
                     <Link to="/register" className="text-[#d4af37] hover:underline">
                       create an account
                     </Link>{" "}
-                    to add items to your cart and favorites.
+                    to add items to your cart.
                   </p>
                 </div>
               </div>
@@ -207,7 +250,7 @@ const Shop = () => {
           {error && !loading && (
             <div className="mb-6 p-4 bg-red-900/20 border border-red-700 rounded-lg">
               <p className="text-red-400">Error loading products: {error}</p>
-              <p className="text-sm text-gray-300 mt-2">Showing cached products instead.</p>
+              <p className="text-sm text-gray-300 mt-2">Showing static products instead.</p>
             </div>
           )}
 
@@ -280,10 +323,13 @@ const Shop = () => {
                         onChange={(e) => setSelectedCategory(e.target.value)}
                         className="w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 text-sm"
                       >
-                        <option value="all">All Categories</option>
-                        <option value="men">Men's Watches</option>
-                        <option value="women">Women's Watches</option>
-                        <option value="smart">Smart Watches</option>
+                        {categories.map((category) => (
+                          <option key={category} value={category}>
+                            {category === "all"
+                              ? "All Categories"
+                              : category.charAt(0).toUpperCase() + category.slice(1)}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -316,7 +362,11 @@ const Shop = () => {
 
                     {/* Clear Filters */}
                     <div className="flex items-end">
-                      <Button onClick={clearFilters} variant="outline" className="w-full border-gray-600">
+                      <Button
+                        onClick={clearFilters}
+                        variant="outline"
+                        className="w-full border-gray-600 bg-transparent"
+                      >
                         Clear Filters
                       </Button>
                     </div>
@@ -366,13 +416,15 @@ const Shop = () => {
                     >
                       <div className={`relative ${viewMode === "list" ? "w-48 flex-shrink-0" : ""}`}>
                         <img
-                          src={
-                            product.mainImage|| product.images?.[0] || "https://via.placeholder.com/200x200"
-                          }
+                          src={getProductImageUrl(product) || "/placeholder.svg"}
                           alt={product.name}
                           className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
                             viewMode === "list" ? "w-full h-48" : "w-full aspect-square"
                           }`}
+                          onError={(e) => {
+                            console.log("❌ Image failed to load:", e.target.src)
+                            e.target.src = "/placeholder.svg?height=300&width=300"
+                          }}
                         />
 
                         {/* Badges */}
@@ -383,21 +435,9 @@ const Shop = () => {
                           {product.isSale && (
                             <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">SALE</span>
                           )}
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => handleToggleFavorite(e, product._id || product.id)}
-                            className={`p-2 rounded-full transition-colors ${
-                              isLoggedIn() && isFavorite(product._id || product.id)
-                                ? "bg-red-600 text-white"
-                                : "bg-black/50 text-white hover:bg-black/70"
-                            } ${!isLoggedIn() ? "opacity-60" : ""}`}
-                            title={!isLoggedIn() ? "Please log in to add to favorites" : "Add to favorites"}
-                          >
-                            <Heart className="h-4 w-4" />
-                          </button>
+                          {dataSource === "database" && (
+                            <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">LIVE</span>
+                          )}
                         </div>
                       </div>
 
@@ -413,8 +453,9 @@ const Shop = () => {
                           </div>
                         </div>
 
-
-                        {viewMode === "list" && <p className="text-sm text-gray-300 mb-4">{product.description}</p>}
+                        {viewMode === "list" && product.description && (
+                          <p className="text-sm text-gray-300 mb-4">{product.description}</p>
+                        )}
 
                         <div className="flex flex-wrap gap-1 mb-4">
                           {(product.features || []).slice(0, viewMode === "list" ? 3 : 2).map((feature, index) => (
@@ -426,23 +467,26 @@ const Shop = () => {
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-xl font-bold text-[#d4af37]">Rs.{product.price.toLocaleString()}</span>
+                            <span className="text-xl font-bold text-[#d4af37]">
+                              Rs.{(product.price || 0).toLocaleString()}
+                            </span>
                             {product.originalPrice && (
                               <span className="text-sm text-gray-400 line-through">
-                                Rs.{product.originalPrice.toLocaleString()}
+                                Rs.{product.originalPrice?.toLocaleString()}
                               </span>
                             )}
                           </div>
                           <Button
                             onClick={(e) => handleAddToCart(e, product)}
                             size="sm"
+                            disabled={!cartLoaded || cartLoading || !isLoggedIn()}
                             className={`bg-[#d4af37] hover:bg-[#b8973a] text-black rounded-none flex items-center gap-2 ${
-                              !isLoggedIn() ? "opacity-60" : ""
+                              !isLoggedIn() || !cartLoaded || cartLoading ? "opacity-60 cursor-not-allowed" : ""
                             }`}
                             title={!isLoggedIn() ? "Please log in to add to cart" : "Add to cart"}
                           >
                             <ShoppingBag className="h-4 w-4" />
-                            Add to Cart
+                            {cartLoading ? "..." : "Add to Cart"}
                           </Button>
                         </div>
                       </div>
@@ -485,6 +529,16 @@ const Shop = () => {
                 </div>
               )}
             </>
+          )}
+
+          {/* Cart Loading Overlay */}
+          {!cartLoaded && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-[#1a1f2c] p-6 rounded-lg text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#d4af37] mx-auto mb-4"></div>
+                <p className="text-white">Loading cart...</p>
+              </div>
+            </div>
           )}
         </div>
       </div>

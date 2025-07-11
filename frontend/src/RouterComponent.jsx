@@ -5,7 +5,6 @@ import Home from "./Components/Home";
 import About from "./Components/About";
 import Contact from "./Components/Contact";
 import Shop from "./Components/Shop";
-import Favorites from "./Components/Favorites";
 import Cart from "./Components/Cart";
 import Register from "./Auth/Register";
 import Login from "./Auth/Login";
@@ -27,7 +26,6 @@ const RouterComponent = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/shop" element={<Shop />} />
-        <Route path="/favorites" element={<Favorites />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />

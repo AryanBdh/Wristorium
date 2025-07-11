@@ -8,6 +8,7 @@ class TokenVerify {
         let response = false;
         try {
             response = jwt.verify(token, process.env.JWT_SECRET);
+            return response;
         } catch (e) {
             response = false;
         }

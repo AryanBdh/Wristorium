@@ -1,6 +1,6 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const cartItemSchema = new mongoose.Schema({
+const itemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
@@ -9,10 +9,8 @@ const cartItemSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     required: true,
-    min: 1,
     default: 1,
   },
-  // Store product snapshot for price consistency
   productSnapshot: {
     name: String,
     price: Number,
@@ -29,46 +27,34 @@ const cartItemSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-})
+});
 
-const cartSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      unique: true, // One cart per user
-      index: true,
-    },
-    items: [cartItemSchema],
-    totalItems: {
-      type: Number,
-      default: 0,
-    },
-    totalAmount: {
-      type: Number,
-      default: 0,
-    },
-    lastUpdated: {
-      type: Date,
-      default: Date.now,
-    },
+const cartSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    unique: true,
+    ref: "User",
   },
-  {
-    versionKey: false,
-    timestamps: true,
+  items: [itemSchema],
+  lastUpdated: {
+    type: Date,
+    default: Date.now,
   },
-)
+});
 
-// Update totals before saving
-cartSchema.pre("save", function (next) {
-  this.totalItems = this.items.reduce((total, item) => total + item.quantity, 0)
-  this.totalAmount = this.items.reduce((total, item) => {
-    const price = item.productSnapshot?.price || 0
-    return total + price * item.quantity
-  }, 0)
-  this.lastUpdated = new Date()
-  next()
-})
+// Virtual fields
+cartSchema.virtual("totalItems").get(function () {
+  return this.items.reduce((sum, item) => sum + item.quantity, 0);
+});
 
-export default mongoose.model("Cart", cartSchema)
+cartSchema.virtual("totalAmount").get(function () {
+  return this.items.reduce((sum, item) => {
+    return sum + ((item.productSnapshot?.price || 0) * item.quantity);
+  }, 0);
+});
+
+cartSchema.set("toJSON", { virtuals: true });
+cartSchema.set("toObject", { virtuals: true });
+
+export default mongoose.model("Cart", cartSchema);

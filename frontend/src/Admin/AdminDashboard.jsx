@@ -59,7 +59,7 @@ const AdminDashboard = () => {
 
         // Fetch order stats
         const orderStatsResponse = await fetch(
-          "http://localhost:3000/orders/stats",
+          "http://localhost:5000/api/orders/stats",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ const AdminDashboard = () => {
 
         // Fetch product stats
         const productStatsResponse = await fetch(
-          "http://localhost:3000/products/stats",
+          "http://localhost:5000/api/products/stats",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -90,7 +90,7 @@ const AdminDashboard = () => {
         const productStats = await productStatsResponse.json();
 
         // Fetch users
-        const usersResponse = await fetch("http://localhost:3000/user", {
+        const usersResponse = await fetch("http://localhost:5000/api/user", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -111,7 +111,7 @@ const AdminDashboard = () => {
 
         // Fetch products
         const productsResponse = await fetch(
-          "http://localhost:3000/products?limit=4",
+          "http://localhost:5000/api/products?limit=4",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -183,7 +183,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:3000/products/${productId}`,
+        `http://localhost:5000/api/products/${productId}`,
         {
           method: "DELETE",
           headers: {

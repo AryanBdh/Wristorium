@@ -17,14 +17,12 @@ import {
 } from "lucide-react"
 import Button from "../../ui/Button"
 import { useCart } from "../../context/CartContext"
-import { useFavorites } from "../../context/FavouritesContext"
 import Header from "../../Header"
 import toast from "react-hot-toast"
 
 const ProductDetail = () => {
   const { id } = useParams()
   const { addToCart } = useCart()
-  const { toggleFavorite, isFavorite } = useFavorites()
 
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -49,7 +47,7 @@ const ProductDetail = () => {
         console.log("Fetching product with ID:", id)
 
         // Try to fetch from database first
-        const productResponse = await fetch(`http://localhost:3000/products/${id}`, {
+        const productResponse = await fetch(`http://localhost:5000/api/products/${id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -128,7 +126,6 @@ const ProductDetail = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4af37] mx-auto mb-4"></div>
             <h1 className="text-2xl font-bold">Loading Product...</h1>
-            <p className="text-gray-400 mt-2">Fetching from database...</p>
           </div>
         </div>
       </>
@@ -173,25 +170,26 @@ const ProductDetail = () => {
           if (img.startsWith("http")) {
             return img
           }
-          return `http://localhost:3000/products/${img}`
+          return `http://localhost:5000/products/${img}`
         })
       } else if (product.mainImage) {
         const mainImg = product.mainImage.startsWith("http")
           ? product.mainImage
-          : `http://localhost:3000/products/${product.mainImage}`
+          : `http://localhost:5000/products/${product.mainImage}`
         return [mainImg]
       } else {
-        return ["/placeholder.svg?height=600&width=600"]
+        return [""]
       }
-    } else {
-      // Static product - use static image
-      return [
-        product.image || "/placeholder.svg?height=600&width=600",
-        "/placeholder.svg?height=600&width=600&text=Side+View",
-        "/placeholder.svg?height=600&width=600&text=Back+View",
-        "/placeholder.svg?height=600&width=600&text=Detail+View",
-      ]
     }
+    // } else {
+    //   // Static product - use static image
+    //   return [
+    //     product.image || "/placeholder.svg?height=600&width=600",
+    //     "/placeholder.svg?height=600&width=600&text=Side+View",
+    //     "/placeholder.svg?height=600&width=600&text=Back+View",
+    //     "/placeholder.svg?height=600&width=600&text=Detail+View",
+    //   ]
+    // }
   })()
 
   const handleAddToCart = () => {
@@ -211,32 +209,11 @@ const ProductDetail = () => {
     
   }
 
-  const handleToggleFavorite = () => {
-    if (!isLoggedIn()) {
-      toast.error("Please log in to add items to your favorites", {
-        id: "login-required-favorites",
-        duration: 4000,
-        icon: "🔒",
-      })
-      return
-    }
-
-    const isCurrentlyFavorite = isFavorite(productId)
-    toggleFavorite(productId, product)
-
-    
-  }
 
   return (
     <>
       <Header />
       <div className="bg-[#162337] text-white min-h-screen">
-        {/* Debug Info - Remove in production */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="bg-blue-900/20 text-blue-300 p-2 text-xs text-center">
-            📊 Product Source: {isDatabaseProduct ? "DATABASE" : "STATIC DATA"} | ID: {productId}
-          </div>
-        )}
 
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -271,7 +248,7 @@ const ProductDetail = () => {
                     <Link to="/register" className="text-[#d4af37] hover:underline">
                       create an account
                     </Link>{" "}
-                    to add items to your cart and favorites.
+                    to add items to your cart.
                   </p>
                 </div>
               </div>
@@ -377,10 +354,10 @@ const ProductDetail = () => {
 
                 {/* Price */}
                 <div className="flex items-center gap-4 mb-6">
-                  <span className="text-3xl font-bold text-[#d4af37]">${product.price?.toLocaleString()}</span>
+                  <span className="text-3xl font-bold text-[#d4af37]">Rs.{product.price?.toLocaleString()}</span>
                   {product.originalPrice && (
                     <span className="text-xl text-gray-400 line-through">
-                      ${product.originalPrice?.toLocaleString()}
+                      Rs.{product.originalPrice?.toLocaleString()}
                     </span>
                   )}
                 </div>
@@ -464,19 +441,6 @@ const ProductDetail = () => {
                       : isDatabaseProduct && product.stock === 0
                         ? "Out of Stock"
                         : "Add to Cart"}
-                  </Button>
-                  <Button
-                    onClick={handleToggleFavorite}
-                    variant="outline"
-                    className={`px-6 py-6 border-gray-600 ${
-                      isFavorite(productId) && isLoggedIn()
-                        ? "bg-red-600 border-red-600 text-white"
-                        : "hover:bg-gray-800"
-                    } ${!isLoggedIn() ? "opacity-60 cursor-not-allowed" : ""}`}
-                    disabled={!isLoggedIn()}
-                    title={!isLoggedIn() ? "Please log in to add to favorites" : "Add to favorites"}
-                  >
-                    <Heart className={`h-5 w-5 ${isFavorite(productId) && isLoggedIn() ? "fill-current" : ""}`} />
                   </Button>
                 </div>
               </div>

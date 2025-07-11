@@ -1,27 +1,28 @@
 import express from "express"
 import CartController from "../controller/CartController.js"
-import TokenVerify from "../middleware/TokenVerify.js"
+import RouteMiddleware from "../middleware/RouteMiddleware.js"
 
 const cartRoute = express.Router()
 const cartInstance = new CartController()
+const auth = new RouteMiddleware()
 
 // All routes require authentication
-cartRoute.use(TokenVerify)
+cartRoute.use(auth.check)
 
 // Get user's cart
 cartRoute.get("/", cartInstance.getUserCart)
 
 // Add to cart
-cartRoute.post("/", cartInstance.addToCart)
+cartRoute.post("/add", cartInstance.addToCart)
 
 // Update cart item quantity
-cartRoute.put("/:productId", cartInstance.updateCartItem)
+cartRoute.put("/update", cartInstance.updateCartItem)
 
 // Remove from cart
-cartRoute.delete("/:productId", cartInstance.removeFromCart)
+cartRoute.delete("/remove/:productId", cartInstance.removeFromCart)
 
 // Clear cart
-cartRoute.delete("/", cartInstance.clearCart)
+cartRoute.delete("/clear", cartInstance.clearCart)
 
 // Get cart count
 cartRoute.get("/count", cartInstance.getCartCount)

@@ -98,7 +98,7 @@ productSchema.methods.toJSON = function () {
       if (image.startsWith("http")) {
         return image
       } else {
-        return `${process.env.PUBLIC_URL}/products/${image}`
+        return `http://localhost:5000/products/${image}`
       }
     })
   }
@@ -107,7 +107,7 @@ productSchema.methods.toJSON = function () {
     if (obj.mainImage.startsWith("http")) {
       obj.mainImage = obj.mainImage
     } else {
-      obj.mainImage = `${process.env.PUBLIC_URL}/products/${obj.mainImage}`
+      obj.mainImage = `http://localhost:5000/products/${obj.mainImage}`
     }
   } else if (obj.images && obj.images.length > 0) {
     obj.mainImage = obj.images[0]

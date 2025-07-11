@@ -4,12 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import { User, LogOut, Settings, Heart, ShoppingBag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import {useCart} from "./context/CartContext"; 
 
 const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const {resetCartState} = useCart();
 
   // Check authentication status
   const checkAuthStatus = () => {
@@ -58,6 +60,10 @@ const UserDropdown = () => {
     // Clear authentication data
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    
+
+    // Reset cart state
+    resetCartState();
 
     // Update state
     setUser(null);
@@ -65,7 +71,6 @@ const UserDropdown = () => {
 
     // Show success message
     toast.success("Logged out successfully", {
-      icon: "👋",
       duration: 3000,
     });
 

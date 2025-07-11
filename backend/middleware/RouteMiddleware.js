@@ -8,6 +8,8 @@ class RouteMiddleware {
         let token = req.headers.authorization.split(" ")[1];
         let response = TokenVerify.verifyToken(token);
         if(response){
+            req.user = response;
+            // console.log("User verified:", req.user);
             next();
         }else{
             return res.json({status: false,message: 'Invalid token'});

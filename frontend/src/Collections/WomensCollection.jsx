@@ -6,14 +6,12 @@ import { Link } from "react-router-dom"
 import Button from "../ui/Button"
 import Input from "../ui/Input"
 import { useCart } from "../context/CartContext"
-import { useFavorites } from "../context/FavouritesContext"
 import watchesData from "../data/watches.json"
 import Header from "../Header"
 import toast from "react-hot-toast"
 
 const WomensCollection = () => {
   const { addToCart } = useCart()
-  const { toggleFavorite, isFavorite } = useFavorites()
 
   // Filter only women's watches
   const womensWatches = watchesData.filter((watch) => watch.category === "women")
@@ -21,7 +19,7 @@ const WomensCollection = () => {
   // State management
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedSubCategory, setSelectedSubCategory] = useState("all")
-  const [priceRange, setPriceRange] = useState([0, 5000])
+  const [priceRange, setPriceRange] = useState([0, 10000])
   const [sortBy, setSortBy] = useState("featured")
   const [viewMode, setViewMode] = useState("grid")
   const [currentPage, setCurrentPage] = useState(1)
@@ -91,7 +89,7 @@ const WomensCollection = () => {
   const clearFilters = () => {
     setSearchTerm("")
     setSelectedSubCategory("all")
-    setPriceRange([0, 5000])
+    setPriceRange([0, 10000])
     setSortBy("featured")
   }
 
@@ -112,25 +110,7 @@ const WomensCollection = () => {
     
   }
 
-  const handleToggleFavorite = (e, watchId) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    if (!isLoggedIn()) {
-      toast.error("Please log in to add items to your favorites", {
-        id: "login-required-favorites",
-        duration: 4000,
-        icon: "🔒",
-      })
-      return
-    }
-
-   
-
-    toggleFavorite(watchId)
-
-    
-  }
+  
 
   // Get min and max prices from women's watches
   const minPrice = Math.min(...womensWatches.map((watch) => watch.price))
@@ -187,7 +167,7 @@ const WomensCollection = () => {
                   <Link to="/register" className="text-[#d4af37] hover:underline">
                     create an account
                   </Link>{" "}
-                  to add items to your cart and favorites.
+                  to add items to your cart.
                 </p>
               </div>
             </div>
@@ -255,22 +235,7 @@ const WomensCollection = () => {
             {showFilters && (
               <div className="bg-[#0f1420] rounded-lg p-6 mb-6 border border-gray-800">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  {/* Collection Filter */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Collection</label>
-                    <select
-                      value={selectedSubCategory}
-                      onChange={(e) => setSelectedSubCategory(e.target.value)}
-                      className="w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 text-sm"
-                    >
-                      <option value="all">All Collections</option>
-                      {subCategories.map((collection) => (
-                        <option key={collection} value={collection}>
-                          {collection.charAt(0).toUpperCase() + collection.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  
 
                   {/* Price Range */}
                   <div className="md:col-span-2">
@@ -280,8 +245,8 @@ const WomensCollection = () => {
                     <div className="flex gap-2">
                       <input
                         type="range"
-                        min={minPrice}
-                        max={maxPrice}
+                        min={0}
+                        max={10000}
                         step="50"
                         value={priceRange[0]}
                         onChange={(e) => setPriceRange([Number.parseInt(e.target.value), priceRange[1]])}
@@ -289,8 +254,8 @@ const WomensCollection = () => {
                       />
                       <input
                         type="range"
-                        min={minPrice}
-                        max={maxPrice}
+                        min={0}
+                        max={10000}
                         step="50"
                         value={priceRange[1]}
                         onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
@@ -359,21 +324,6 @@ const WomensCollection = () => {
                     <div className="absolute top-3 left-3 flex flex-col gap-1">
                       {watch.isNew && <span className="bg-[#d4af37] text-black text-xs px-2 py-1 rounded">NEW</span>}
                       {watch.isSale && <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">SALE</span>}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => handleToggleFavorite(e, watch.id)}
-                        className={`p-2 rounded-full transition-colors ${
-                          isLoggedIn() && isFavorite(watch.id)
-                            ? "bg-red-600 text-white"
-                            : "bg-black/50 text-white hover:bg-black/70"
-                        } ${!isLoggedIn() ? "opacity-60" : ""}`}
-                        title={!isLoggedIn() ? "Please log in to add to favorites" : "Add to favorites"}
-                      >
-                        <Heart className="h-4 w-4" />
-                      </button>
                     </div>
                   </div>
 

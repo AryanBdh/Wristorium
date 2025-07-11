@@ -143,7 +143,7 @@ const Register = () => {
         password: "********", // Don't log actual password
       })
 
-      const res = await fetch("http://localhost:3000/register", {
+      const res = await fetch("http://localhost:5000/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -179,7 +179,7 @@ const Register = () => {
       localStorage.setItem("token", data.token)
 
       // Fetch user profile with the token
-      const profileRes = await fetch("http://localhost:3000/user/profile", {
+      const profileRes = await fetch("http://localhost:5000/api/user/profile", {
         headers: {
           Authorization: `Bearer ${data.token}`,
         },

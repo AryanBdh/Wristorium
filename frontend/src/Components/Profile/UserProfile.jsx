@@ -101,7 +101,6 @@ const UserProfile = () => {
     { id: "overview", label: "Overview", icon: User },
     { id: "orders", label: "Orders", icon: Package },
     { id: "addresses", label: "Addresses", icon: MapPin },
-    { id: "settings", label: "Settings", icon: Settings },
   ]
 
   return (
@@ -245,16 +244,11 @@ const UserProfile = () => {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="bg-[#0f1420] rounded-lg p-6 text-center">
                     <Package className="h-8 w-8 text-[#d4af37] mx-auto mb-3" />
                     <div className="text-2xl font-bold mb-1">{orders.length}</div>
                     <div className="text-sm text-gray-400">Total Orders</div>
-                  </div>
-                  <div className="bg-[#0f1420] rounded-lg p-6 text-center">
-                    <Heart className="h-8 w-8 text-[#d4af37] mx-auto mb-3" />
-                    <div className="text-2xl font-bold mb-1">12</div>
-                    <div className="text-sm text-gray-400">Favorites</div>
                   </div>
                 </div>
 
@@ -378,115 +372,6 @@ const UserProfile = () => {
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === "settings" && (
-              <div className="space-y-6">
-                {/* Account Security */}
-                <div className="bg-[#0f1420] rounded-lg p-6">
-                  <h2 className="text-xl font-semibold mb-6">Account Security</h2>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-[#1a1f2c] rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Shield className="h-5 w-5 text-[#d4af37]" />
-                        <div>
-                          <div className="font-medium">Password</div>
-                          <div className="text-sm text-gray-400">Last changed 3 months ago</div>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="border-gray-600">
-                        Change Password
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-[#1a1f2c] rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Mail className="h-5 w-5 text-[#d4af37]" />
-                        <div>
-                          <div className="font-medium">Email Verification</div>
-                          <div className="text-sm text-green-400">Verified</div>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="border-gray-600">
-                        Update Email
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-[#1a1f2c] rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-5 w-5 text-[#d4af37]" />
-                        <div>
-                          <div className="font-medium">Two-Factor Authentication</div>
-                          <div className="text-sm text-gray-400">Not enabled</div>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="border-gray-600">
-                        Enable 2FA
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Preferences */}
-                <div className="bg-[#0f1420] rounded-lg p-6">
-                  <h2 className="text-xl font-semibold mb-6">Preferences</h2>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">Email Notifications</div>
-                        <div className="text-sm text-gray-400">Receive updates about orders and promotions</div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#d4af37]"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">SMS Notifications</div>
-                        <div className="text-sm text-gray-400">Receive shipping updates via SMS</div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#d4af37]"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">Marketing Communications</div>
-                        <div className="text-sm text-gray-400">
-                          Receive exclusive offers and new product announcements
-                        </div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#d4af37]"></div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Danger Zone */}
-                <div className="bg-[#0f1420] rounded-lg p-6 border border-red-900/20">
-                  <h2 className="text-xl font-semibold mb-6 text-red-400">Danger Zone</h2>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-red-900/10 rounded-lg border border-red-900/20">
-                      <div>
-                        <div className="font-medium text-red-400">Delete Account</div>
-                        <div className="text-sm text-gray-400">Permanently delete your account and all data</div>
-                      </div>
-                      <Button variant="outline" className="border-red-600 text-red-400 hover:bg-red-900/20">
-                        Delete Account
-                      </Button>
-                    </div>
-                  </div>
                 </div>
               </div>
             )}

@@ -2,16 +2,13 @@ import { Link } from "react-router-dom";
 import { Search, ShoppingBag, Heart } from "lucide-react";
 import MobileMenu from "./MobileMenu";
 import { useCart } from "./context/CartContext";
-import { useFavorites } from "./context/FavouritesContext";
 import CollectionDropdown from "./CollectionDropdown";
 import UserDropdown from "./UserDropdown";
 
 const Header = () => {
   const { getCartItemsCount } = useCart();
-  const { getFavoritesCount } = useFavorites();
 
   const cartItemsCount = getCartItemsCount();
-  const favoritesCount = getFavoritesCount();
 
   return (
     <>
@@ -40,14 +37,6 @@ const Header = () => {
               {cartItemsCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-[#d4af37] text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                   {cartItemsCount > 99 ? "99+" : cartItemsCount}
-                </span>
-              )}
-            </Link>
-            <Link to="/favorites" className="relative" aria-label="Favorites">
-              <Heart className="h-5 w-5 text-gray-300 hover:text-[#d4af37] transition" />
-              {favoritesCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#d4af37] text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                  {favoritesCount > 99 ? "99+" : favoritesCount}
                 </span>
               )}
             </Link>

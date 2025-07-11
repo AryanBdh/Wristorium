@@ -1,5 +1,6 @@
 import Cart from "../models/Cart.js"
 import Product from "../models/Product.js"
+import mongoose from "mongoose"
 
 class CartController {
   // Get user's cart
@@ -20,6 +21,7 @@ class CartController {
         if (item.productId) {
           return {
             _id: item._id,
+            productId: item.productId._id,
             product: item.productId,
             quantity: item.quantity,
             addedAt: item.addedAt,
@@ -28,6 +30,7 @@ class CartController {
           // Product deleted, use snapshot
           return {
             _id: item._id,
+            productId: item.productId,
             product: item.productSnapshot,
             quantity: item.quantity,
             addedAt: item.addedAt,
@@ -109,7 +112,7 @@ class CartController {
       } else {
         // Add new item
         cart.items.push({
-          productId,
+          productId: new mongoose.Types.ObjectId(productId),
           quantity,
           productSnapshot: {
             name: product.name,
@@ -127,11 +130,28 @@ class CartController {
       }
 
       await cart.save()
+      console.log("Cart saved:", JSON.stringify(cart, null, 2));
+
+
+      // Return updated cart with populated products
+      await cart.populate("items.productId")
 
       res.json({
         success: true,
         message: "Added to cart",
-        cart,
+        cart: {
+          _id: cart._id,
+          items: cart.items.map((item) => ({
+            _id: item._id,
+            productId: item.productId._id,
+            product: item.productId,
+            quantity: item.quantity,
+            addedAt: item.addedAt,
+          })),
+          totalItems: cart.totalItems,
+          totalAmount: cart.totalAmount,
+          lastUpdated: cart.lastUpdated,
+        },
       })
     } catch (error) {
       console.error("Error adding to cart:", error)
@@ -147,8 +167,7 @@ class CartController {
   async updateCartItem(req, res) {
     try {
       const userId = req.user.id
-      const { productId } = req.params
-      const { quantity } = req.body
+      const { productId, quantity } = req.body
 
       if (quantity < 0) {
         return res.status(400).json({
@@ -190,11 +209,24 @@ class CartController {
       }
 
       await cart.save()
+      await cart.populate("items.productId")
 
       res.json({
         success: true,
         message: quantity === 0 ? "Item removed from cart" : "Cart updated",
-        cart,
+        cart: {
+          _id: cart._id,
+          items: cart.items.map((item) => ({
+            _id: item._id,
+            productId: item.productId._id,
+            product: item.productId,
+            quantity: item.quantity,
+            addedAt: item.addedAt,
+          })),
+          totalItems: cart.totalItems,
+          totalAmount: cart.totalAmount,
+          lastUpdated: cart.lastUpdated,
+        },
       })
     } catch (error) {
       console.error("Error updating cart:", error)
@@ -230,11 +262,24 @@ class CartController {
 
       cart.items.splice(itemIndex, 1)
       await cart.save()
+      await cart.populate("items.productId")
 
       res.json({
         success: true,
         message: "Item removed from cart",
-        cart,
+        cart: {
+          _id: cart._id,
+          items: cart.items.map((item) => ({
+            _id: item._id,
+            productId: item.productId._id,
+            product: item.productId,
+            quantity: item.quantity,
+            addedAt: item.addedAt,
+          })),
+          totalItems: cart.totalItems,
+          totalAmount: cart.totalAmount,
+          lastUpdated: cart.lastUpdated,
+        },
       })
     } catch (error) {
       console.error("Error removing from cart:", error)
@@ -264,8 +309,13 @@ class CartController {
 
       res.json({
         success: true,
-        message: "Cart cleared",
-        cart,
+        cart: {
+          _id: cart._id,
+          items: [],
+          totalItems: 0,
+          totalAmount: 0,
+          lastUpdated: cart.lastUpdated,
+        },
       })
     } catch (error) {
       console.error("Error clearing cart:", error)

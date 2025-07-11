@@ -5,7 +5,6 @@ import loginRoute from "./loginRoute.js";
 import registerRoute from "./registerRoute.js";
 import productRoute from "./productRoute.js";
 import orderRoute from "./orderRoute.js";
-import favoriteRoute from "./FavoriteRoute.js";
 import cartRoute from "./cartRoute.js";
 
 const auth = new RouteMiddleware();
@@ -21,8 +20,7 @@ webRouter.use('/login', loginRoute);
 webRouter.use('/register', registerRoute);
 webRouter.use('/products', productRoute);
 webRouter.use('/orders', orderRoute);
-webRouter.use("/api/favorites", favoriteRoute)
-webRouter.use("/api/cart", cartRoute)
+webRouter.use("/cart", cartRoute)
 
 
 export default webRouter;
