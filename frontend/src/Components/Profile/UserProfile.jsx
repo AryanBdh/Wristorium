@@ -195,7 +195,7 @@ const UserProfile = () => {
                       </Button>
               </Link>
               
-              </div>
+            </div>
           </div>
         </div>
       </div>

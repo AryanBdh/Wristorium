@@ -15,6 +15,7 @@ import ProductDetail from "./Components/Product/ProductDetail";
 import MensCollection from "./Collections/MensCollection";
 import WomensCollection from "./Collections/WomensCollection";
 import ScrollToTop from "./ScrollToTop";
+import Checkout from "./Components/Checkout";
 
 const RouterComponent = () => {
   return (
@@ -30,6 +31,7 @@ const RouterComponent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<UserProfile />} />
+        <Route path="checkout" element={<Checkout />}/>
 
         {/* Protected Routes */}
         <Route

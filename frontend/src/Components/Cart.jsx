@@ -174,9 +174,11 @@ const Cart = () => {
                   </div>
                 </div>
 
+              <Link to="/checkout">
                 <Button className="w-full bg-[#d4af37] hover:bg-[#b8973a] text-black rounded-none py-6 mb-4">
                   Proceed to Checkout
                 </Button>
+              </Link>
 
                 <div className="text-center text-sm text-gray-400">
                   <p>30-day return policy</p>
