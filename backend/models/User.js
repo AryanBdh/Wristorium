@@ -4,6 +4,23 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 dotenv.config();
 
+const addressSchema = new mongoose.Schema({
+  type: {
+    type: String, 
+    required: true,
+  },
+  name: String,
+  street: String,
+  city: String,
+  district: String,
+  zipCode: String,
+  country: String,
+  isDefault: {
+    type: Boolean,
+    default: false,
+  },
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -14,13 +31,13 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    password: {
+    phone: {
         type: String,
         required: true,
     },
-    gender:{
+    password: {
         type: String,
-        enum: ["male", "female"], 
+        required: true,
     },
     role: {
         type: String,
@@ -29,7 +46,9 @@ const userSchema = new mongoose.Schema({
     },
     image: {
         type: String,
-    }
+    },
+    addresses: [addressSchema],
+    
 },{
     versionKey: false,
     timestamps: true,

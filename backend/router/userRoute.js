@@ -12,6 +12,6 @@ userRoute.get("/profile", userInstance.getProfile);
 userRoute.get("/verify-admin", userInstance.verifyAdmin)
 userRoute.get("/:id", userInstance.show);
 userRoute.post("/",upI.single("image"), userInstance.store);
-userRoute.put("/:id", userInstance.update);
+userRoute.put("/update/:id", userInstance.update);
 userRoute.delete("/:id", userInstance.destroy);
 export default userRoute;
