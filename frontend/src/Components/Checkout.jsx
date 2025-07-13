@@ -11,22 +11,18 @@ const Checkout = () => {
   const { cartItems, getCartTotal, isLoaded } = useCart(); // Use proper cart context
   const [user, setUser] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("esewa");
+  const [paymentMethod, setPaymentMethod] = useState("eSewa");
   const [loading, setLoading] = useState(false);
+
+  
 
   // Payment method options with images
   const paymentMethods = [
     {
-      id: "esewa",
+      id: "eSewa",
       name: "eSewa",
       image: "src/images/esewa-logo.jpg",
       description: "Pay with eSewa digital wallet",
-    },
-    {
-      id: "khalti",
-      name: "Khalti",
-      image: "src/images/khalti-logo.png",
-      description: "Pay with Khalti digital wallet",
     },
     {
       id: "cash_on_delivery",
@@ -35,6 +31,8 @@ const Checkout = () => {
       description: "Pay when you receive your order",
     },
   ];
+
+  const selectedMethod = paymentMethods.find((m) => m.id === paymentMethod);
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -345,13 +343,13 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Tax:</span>
-                    <span className="text-white">Rs. 0</span>
+                    <span>Rs.{(getCartTotal() * 0.13).toLocaleString()}</span>
                   </div>
                   <div className="border-t border-gray-700 pt-2 mt-2">
                     <div className="flex justify-between text-lg font-semibold">
                       <span className="text-white">Total:</span>
                       <span className="text-[#d4af37]">
-                        Rs. {getCartTotal().toLocaleString()}
+                        Rs. {(getCartTotal()* 1.13).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -365,14 +363,7 @@ const Checkout = () => {
                   }
                   className="w-full mt-6 bg-[#d4af37] text-black hover:bg-[#b8973a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-                      Placing Order...
-                    </div>
-                  ) : (
-                    `Place Order - Rs. ${getCartTotal().toLocaleString()}`
-                  )}
+                  {selectedMethod ? `Pay with ${selectedMethod.name}` : "Select Payment Method"}
                 </Button>
 
                 {/* Order Info */}

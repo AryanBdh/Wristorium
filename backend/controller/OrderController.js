@@ -1,6 +1,7 @@
 import Order from "../models/Order.js"
 import User from "../models/User.js"
 import Product from "../models/Product.js"
+import Payment from "../models/Payment.js"
 
 class OrderController {
   async index(req, res) {
@@ -82,70 +83,77 @@ class OrderController {
   }
 
   async store(req, res) {
-    try {
-      const { userId, products, shippingAddress, paymentMethod, notes } = req.body
+  try {
+    const { userId, products, shippingAddress, paymentMethod, notes } = req.body;
 
-      // Verify user exists
-      const user = await User.findById(userId)
-      if (!user) {
-        return res.status(404).json({ error: "User not found" })
+    console.log("Received order data:", req.body);
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    let totalAmount = 0;
+    const orderProducts = [];
+
+    for (const item of products) {
+      const product = await Product.findById(item.productId);
+      if (!product) {
+        return res.status(404).json({ error: `Product ${item.productId} not found` });
+      }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
       }
 
-      // Verify products and calculate total
-      let totalAmount = 0
-      const orderProducts = []
+      orderProducts.push({
+        product: product._id,
+        quantity: item.quantity,
+        price: product.price,
+      });
 
-      for (const item of products) {
-        const product = await Product.findById(item.productId)
-        if (!product) {
-          return res.status(404).json({ error: `Product ${item.productId} not found` })
-        }
+      product.stock -= item.quantity;
+      await product.save();
 
-        if (product.stock < item.quantity) {
-          return res.status(400).json({ error: `Insufficient stock for ${product.name}` })
-        }
-
-        // Add to order products
-        orderProducts.push({
-          product: product._id,
-          quantity: item.quantity,
-          price: product.price,
-        })
-
-        // Update product stock
-        product.stock -= item.quantity
-        await product.save()
-
-        // Add to total
-        totalAmount += product.price * item.quantity
-      }
-
-      // Create order
-      const order = new Order({
-        user: userId,
-        products: orderProducts,
-        totalAmount,
-        shippingAddress,
-        paymentMethod,
-        notes,
-      })
-
-      await order.save()
-
-      return res.status(201).json({
-        status: true,
-        message: "Order created successfully!",
-        order,
-      })
-    } catch (error) {
-      console.error("Error creating order:", error)
-      return res.status(500).json({
-        status: false,
-        message: "Failed to create order",
-        error: error.message,
-      })
+      totalAmount += product.price * item.quantity;
     }
+
+    const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    const order = new Order({     
+      user: userId,
+      products: orderProducts,
+      totalAmount,
+      shippingAddress,
+      paymentMethod,
+      notes,
+      orderNumber,
+    });
+
+    console.log("Creating order:", order);
+
+    await order.save();
+
+    // Create payment record
+    await Payment.create({
+      order: order._id,
+      paymentMethod,
+      status: paymentMethod === "cash_on_delivery" ? "pending" : "paid",
+      amount: totalAmount,
+    });
+
+    return res.status(201).json({
+      status: true,
+      message: "Order created successfully!",
+      order,
+    });
+  } catch (error) {
+    console.error("Error creating order:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Failed to create order",
+      error: error.message,
+    });
   }
+}
+
 
   async update(req, res) {
     try {

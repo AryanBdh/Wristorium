@@ -162,13 +162,13 @@ const Cart = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>Tax</span>
-                    <span>Rs.{(getCartTotal() * 0.08).toLocaleString()}</span>
+                    <span>Rs.{(getCartTotal() * 0.13).toLocaleString()}</span>
                   </div>
                   <div className="border-t border-gray-700 pt-3">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
                       <span className="text-[#d4af37]">
-                        Rs.{(getCartTotal() * 1.08).toLocaleString()}
+                        Rs.{(getCartTotal() * 1.13).toLocaleString()}
                       </span>
                     </div>
                   </div>

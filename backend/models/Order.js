@@ -45,8 +45,8 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["credit_card", "paypal", "bank_transfer"],
-      default: "credit_card",
+      enum: ["eSewa","cash_on_delivery"],
+      default: "cash_on_delivery",
     },
     paymentStatus: {
       type: String,

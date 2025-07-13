@@ -31,7 +31,7 @@ const RouterComponent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<UserProfile />} />
-        <Route path="checkout" element={<Checkout />}/>
+        <Route path="/checkout" element={<Checkout />}/>
 
         {/* Protected Routes */}
         <Route
