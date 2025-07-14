@@ -504,6 +504,8 @@ const AddProduct = () => {
                   <div className="relative">
                     <Input
                       name="sku"
+                      type="number"
+                      min="100"
                       value={productData.sku}
                       onChange={(e) => handleInputChange("sku", e.target.value)}
                       onBlur={() => handleBlur("sku")}

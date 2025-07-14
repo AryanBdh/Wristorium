@@ -6,6 +6,7 @@ import registerRoute from "./registerRoute.js";
 import productRoute from "./productRoute.js";
 import orderRoute from "./orderRoute.js";
 import cartRoute from "./cartRoute.js";
+import paymentRoute from "./paymentRoute.js";
 
 const auth = new RouteMiddleware();
 
@@ -21,6 +22,7 @@ webRouter.use('/register', registerRoute);
 webRouter.use('/products', productRoute);
 webRouter.use('/orders', orderRoute);
 webRouter.use("/cart", cartRoute)
+webRouter.use("/payment", paymentRoute);
 
 
 export default webRouter;

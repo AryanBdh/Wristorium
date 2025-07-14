@@ -11,7 +11,9 @@ orderRoute.get("/", auth.check, orderInstance.index)
 orderRoute.get("/stats", auth.check, orderInstance.getStats)
 orderRoute.get("/:id", auth.check, orderInstance.show)
 orderRoute.post("/", auth.check, orderInstance.store)
+orderRoute.delete("/:id/cancel", auth.check, orderInstance.cancelOrder)
 orderRoute.put("/:id", auth.check, orderInstance.update)
+
 orderRoute.get("/user/:userId", auth.check, orderInstance.getUserOrders)
 
 export default orderRoute

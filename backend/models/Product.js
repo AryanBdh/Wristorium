@@ -78,7 +78,7 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
     sku: {
-      type: String,
+      type: Number,
       unique: true,
       sparse: true,
     },

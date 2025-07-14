@@ -16,6 +16,9 @@ import MensCollection from "./Collections/MensCollection";
 import WomensCollection from "./Collections/WomensCollection";
 import ScrollToTop from "./ScrollToTop";
 import Checkout from "./Components/Checkout";
+import EsewaCallback from "./esewa/EsewaCallback";
+import OrderSuccess from "./esewa/OrderSuccess";
+import EditProduct from "./Admin/EditProduct";
 
 const RouterComponent = () => {
   return (
@@ -31,7 +34,11 @@ const RouterComponent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<UserProfile />} />
-        <Route path="/checkout" element={<Checkout />}/>
+        <Route path="/checkout" element={<Checkout />} />
+
+        {/* Payment Routes */}
+        <Route path="/payment/esewa/callback" element={<EsewaCallback />} />
+        <Route path="/order/success/:orderId" element={<OrderSuccess />} />
 
         {/* Protected Routes */}
         <Route
@@ -50,6 +57,15 @@ const RouterComponent = () => {
             </AdminRoute>
           }
         />
+        <Route
+          path="/dashboard/products/:id/edit"
+          element={
+            <AdminRoute>
+              <EditProduct />
+            </AdminRoute>
+          }
+        />
+
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/collections/men" element={<MensCollection />} />
         <Route path="/collections/women" element={<WomensCollection />} />

@@ -1,42 +1,42 @@
-import Order from "../models/Order.js"
-import User from "../models/User.js"
-import Product from "../models/Product.js"
-import Payment from "../models/Payment.js"
+import Order from "../models/Order.js";
+import User from "../models/User.js";
+import Product from "../models/Product.js";
+import Payment from "../models/Payment.js";
 
 class OrderController {
   async index(req, res) {
     try {
-      const { status, sort, limit = 50, page = 1 } = req.query
+      const { status, sort, limit = 50, page = 1 } = req.query;
 
       // Build query
-      const query = {}
-      if (status) query.status = status
+      const query = {};
+      if (status) query.status = status;
 
       // Build sort options
-      let sortOptions = {}
+      let sortOptions = {};
       if (sort) {
         switch (sort) {
           case "newest":
-            sortOptions = { createdAt: -1 }
-            break
+            sortOptions = { createdAt: -1 };
+            break;
           case "oldest":
-            sortOptions = { createdAt: 1 }
-            break
+            sortOptions = { createdAt: 1 };
+            break;
           case "amount-high":
-            sortOptions = { totalAmount: -1 }
-            break
+            sortOptions = { totalAmount: -1 };
+            break;
           case "amount-low":
-            sortOptions = { totalAmount: 1 }
-            break
+            sortOptions = { totalAmount: 1 };
+            break;
           default:
-            sortOptions = { createdAt: -1 } // Default sort by newest
+            sortOptions = { createdAt: -1 }; // Default sort by newest
         }
       } else {
-        sortOptions = { createdAt: -1 } // Default sort by newest
+        sortOptions = { createdAt: -1 }; // Default sort by newest
       }
 
       // Calculate pagination
-      const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
+      const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit);
 
       // Execute query with population
       const orders = await Order.find(query)
@@ -44,10 +44,10 @@ class OrderController {
         .populate("products.product", "name price images mainImage")
         .sort(sortOptions)
         .skip(skip)
-        .limit(Number.parseInt(limit))
+        .limit(Number.parseInt(limit));
 
       // Get total count for pagination
-      const total = await Order.countDocuments(query)
+      const total = await Order.countDocuments(query);
 
       return res.status(200).json({
         orders,
@@ -57,133 +57,305 @@ class OrderController {
           limit: Number.parseInt(limit),
           pages: Math.ceil(total / Number.parseInt(limit)),
         },
-      })
+      });
     } catch (error) {
-      console.error("Error fetching orders:", error)
-      return res.status(500).json({ error: "Failed to fetch orders" })
+      console.error("Error fetching orders:", error);
+      return res.status(500).json({ error: "Failed to fetch orders" });
     }
   }
 
   async show(req, res) {
     try {
-      const { id } = req.params
+      const { id } = req.params;
       const order = await Order.findById(id)
         .populate("user", "name email")
-        .populate("products.product", "name price images mainImage")
+        .populate("products.product", "name price images mainImage");
 
       if (!order) {
-        return res.status(404).json({ error: "Order not found" })
+        return res.status(404).json({ error: "Order not found" });
       }
 
-      return res.status(200).json(order)
+      // Also get payment information
+      const payment = await Payment.findOne({ order: id });
+
+      return res.status(200).json({
+        ...order.toObject(),
+        payment: payment || null,
+      });
     } catch (error) {
-      console.error("Error fetching order:", error)
-      return res.status(500).json({ error: "Failed to fetch order" })
+      console.error("Error fetching order:", error);
+      return res.status(500).json({ error: "Failed to fetch order" });
     }
   }
 
   async store(req, res) {
-  try {
-    const { userId, products, shippingAddress, paymentMethod, notes } = req.body;
+    try {
+      const { userId, products, shippingAddress, paymentMethod, notes } =
+        req.body;
 
-    console.log("Received order data:", req.body);
+      console.log("Received order data:", req.body);
 
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    let totalAmount = 0;
-    const orderProducts = [];
-
-    for (const item of products) {
-      const product = await Product.findById(item.productId);
-      if (!product) {
-        return res.status(404).json({ error: `Product ${item.productId} not found` });
-      }
-      if (product.stock < item.quantity) {
-        return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
+      // Verify user exists
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
       }
 
-      orderProducts.push({
-        product: product._id,
-        quantity: item.quantity,
-        price: product.price,
+      let totalAmount = 0;
+      const orderProducts = [];
+
+      // Process each product
+      for (const item of products) {
+        const product = await Product.findById(item.productId);
+        if (!product) {
+          return res
+            .status(404)
+            .json({ error: `Product ${item.productId} not found` });
+        }
+
+        if (product.stock < item.quantity) {
+          return res
+            .status(400)
+            .json({ error: `Insufficient stock for ${product.name}` });
+        }
+
+        orderProducts.push({
+          product: product._id,
+          quantity: item.quantity,
+          price: product.price,
+        });
+
+        // Update product stock
+        product.stock -= item.quantity;
+        await product.save();
+
+        totalAmount += product.price * item.quantity * 1.13; // Including 13% VAT
+      }
+
+      const generateOrderNumber = () => {
+        const now = new Date();
+        const datePart = now.toISOString().slice(2, 10).replace(/-/g, ""); // "250714"
+        const timePart = now.getTime().toString().slice(-5); // "randomish"
+        const random = Math.floor(100 + Math.random() * 900); // 3-digit random
+        return `WH-${datePart}-${timePart}${random}`;
+      };
+
+      const roundedTotal=Number(totalAmount.toFixed(2));
+
+      // Create order with all required fields
+      const order = new Order({
+        orderNumber: generateOrderNumber(),
+        user: userId,
+        phone: user.phone || "",
+        products: orderProducts,
+        totalAmount: roundedTotal,
+        shippingAddress: {
+          name: shippingAddress.name || user.name || "",
+          street: shippingAddress.street || "",
+          city: shippingAddress.city || "",
+          district: shippingAddress.district || "",
+          zipCode: shippingAddress.zipCode || "",
+          country: shippingAddress.country || "",
+        },
+        paymentMethod,
+        paymentStatus:
+          paymentMethod === "cash_on_delivery" ? "pending" : "pending",
+        status: "processing",
+        notes: notes || "",
       });
 
-      product.stock -= item.quantity;
-      await product.save();
+      console.log("Creating order:", order);
 
-      totalAmount += product.price * item.quantity;
+      // Save the order (this will trigger the pre-save hook to generate orderNumber)
+      await order.save();
+
+      console.log("Order saved with orderNumber:", order.orderNumber);
+
+      // Create payment record
+      const payment = await Payment.create({
+        order: order._id,
+        paymentMethod,
+        status: paymentMethod === "cash_on_delivery" ? "pending" : "pending",
+        amount: totalAmount,
+        notes: `Payment for order ${order.orderNumber}`,
+      });
+
+      console.log("Payment record created:", payment);
+
+      // For COD, order is immediately successful
+      if (paymentMethod === "cash_on_delivery") {
+        return res.status(201).json({
+          status: true,
+          message: "Order placed successfully! You will pay upon delivery.",
+          order: {
+            _id: order._id,
+            orderNumber: order.orderNumber,
+            totalAmount: order.totalAmount,
+            paymentMethod: order.paymentMethod,
+            paymentStatus: order.paymentStatus,
+            status: order.status,
+            createdAt: order.createdAt,
+            products: order.products,
+            shippingAddress: order.shippingAddress,
+          },
+          payment: {
+            _id: payment._id,
+            paymentMethod: payment.paymentMethod,
+            status: payment.status,
+            amount: payment.amount,
+            createdAt: payment.createdAt,
+          },
+          isDirectSuccess: true, // Flag to indicate immediate success
+        });
+      }
+
+      // For online payments, return order for payment processing
+      return res.status(201).json({
+        status: true,
+        message: "Order created successfully! Please complete payment.",
+        order: {
+          _id: order._id,
+          orderNumber: order.orderNumber,
+          totalAmount: order.totalAmount,
+          paymentMethod: order.paymentMethod,
+          paymentStatus: order.paymentStatus,
+          status: order.status,
+          createdAt: order.createdAt,
+          products: order.products,
+          shippingAddress: order.shippingAddress,
+        },
+        payment: {
+          _id: payment._id,
+          paymentMethod: payment.paymentMethod,
+          status: payment.status,
+          amount: payment.amount,
+          createdAt: payment.createdAt,
+        },
+        requiresPayment: true, // Flag to indicate payment is required
+      });
+    } catch (error) {
+      console.error("Error creating order:", error);
+      return res.status(500).json({
+        status: false,
+        message: "Failed to create order",
+        error: error.message,
+      });
     }
-
-    const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
-    const order = new Order({     
-      user: userId,
-      products: orderProducts,
-      totalAmount,
-      shippingAddress,
-      paymentMethod,
-      notes,
-      orderNumber,
-    });
-
-    console.log("Creating order:", order);
-
-    await order.save();
-
-    // Create payment record
-    await Payment.create({
-      order: order._id,
-      paymentMethod,
-      status: paymentMethod === "cash_on_delivery" ? "pending" : "paid",
-      amount: totalAmount,
-    });
-
-    return res.status(201).json({
-      status: true,
-      message: "Order created successfully!",
-      order,
-    });
-  } catch (error) {
-    console.error("Error creating order:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Failed to create order",
-      error: error.message,
-    });
   }
-}
-
 
   async update(req, res) {
     try {
-      const { id } = req.params
-      const { status, paymentStatus, trackingNumber, notes } = req.body
+      const { id } = req.params;
+      const { status, paymentStatus, trackingNumber, notes, transactionId } =
+        req.body;
 
-      const order = await Order.findById(id)
+      const order = await Order.findById(id);
 
       if (!order) {
-        return res.status(404).json({ error: "Order not found" })
+        return res.status(404).json({ error: "Order not found" });
       }
 
       // Update fields
-      if (status) order.status = status
-      if (paymentStatus) order.paymentStatus = paymentStatus
-      if (trackingNumber) order.trackingNumber = trackingNumber
-      if (notes) order.notes = notes
+      if (status) order.status = status;
+      if (paymentStatus) order.paymentStatus = paymentStatus;
+      if (trackingNumber) order.trackingNumber = trackingNumber;
+      if (notes) order.notes = notes;
+      if (transactionId) order.transactionId = transactionId;
 
-      await order.save()
+      await order.save();
+
+      // Update payment record if payment status changed
+      if (paymentStatus || transactionId) {
+        const updateData = {};
+        if (paymentStatus) updateData.status = paymentStatus;
+        if (transactionId) updateData.transactionId = transactionId;
+        if (paymentStatus === "paid") updateData.paidAt = new Date();
+
+        await Payment.findOneAndUpdate({ order: id }, updateData, {
+          new: true,
+        });
+      }
 
       return res.status(200).json({
         status: true,
         message: "Order updated successfully!",
         order,
-      })
+      });
     } catch (error) {
-      console.error("Error updating order:", error)
+      console.error("Error updating order:", error);
       return res.status(500).json({
         status: false,
         message: "Failed to update order",
+        error: error.message,
+      });
+    }
+  }
+
+  async cancelOrder(req, res) {
+    try {
+      const { id } = req.params
+      const { userId } = req.body
+
+      console.log(`Attempting to cancel order ${id} for user ${userId}`)
+
+      // Find the order and populate product details
+      const order = await Order.findById(id).populate("products.product")
+
+      if (!order) {
+        return res.status(404).json({
+          status: false,
+          message: "Order not found",
+        })
+      }
+
+      // Check if the order belongs to the user
+      if (order.user.toString() !== userId) {
+        return res.status(403).json({
+          status: false,
+          message: "You can only cancel your own orders",
+        })
+      }
+
+      // Check if order can be cancelled (only processing orders can be cancelled)
+      if (order.status !== "processing") {
+        return res.status(400).json({
+          status: false,
+          message: `Cannot cancel order with status: ${order.status}`,
+        })
+      }
+
+      console.log("Order found and can be cancelled:", order.orderNumber)
+
+      // Restore product stock for each item in the order
+      for (const item of order.products) {
+        if (item.product) {
+          const product = await Product.findById(item.product._id)
+          if (product) {
+            product.stock += item.quantity
+            await product.save()
+            console.log(`Restored ${item.quantity} stock for product ${product.name}`)
+          }
+        }
+      }
+
+      // Delete the payment record first (due to foreign key constraint)
+      const paymentDeleted = await Payment.findOneAndDelete({ order: id })
+      console.log("Payment record deleted:", paymentDeleted ? "Yes" : "No")
+
+      // Delete the order from database
+      const deletedOrder = await Order.findByIdAndDelete(id)
+      console.log("Order deleted:", deletedOrder ? "Yes" : "No")
+
+      return res.status(200).json({
+        status: true,
+        message: "Order cancelled and removed successfully!",
+        orderNumber: order.orderNumber,
+      })
+    } catch (error) {
+      console.error("Error cancelling order:", error)
+      return res.status(500).json({
+        status: false,
+        message: "Failed to cancel order",
         error: error.message,
       })
     }
@@ -192,7 +364,7 @@ class OrderController {
   async getStats(req, res) {
     try {
       // Get total orders count
-      const totalOrders = await Order.countDocuments()
+      const totalOrders = await Order.countDocuments();
 
       // Get total revenue
       const revenueResult = await Order.aggregate([
@@ -202,8 +374,9 @@ class OrderController {
             totalRevenue: { $sum: "$totalAmount" },
           },
         },
-      ])
-      const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0
+      ]);
+      const totalRevenue =
+        revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
 
       // Get orders by status
       const ordersByStatus = await Order.aggregate([
@@ -213,47 +386,72 @@ class OrderController {
             count: { $sum: 1 },
           },
         },
-      ])
+      ]);
+
+      // Get payment statistics
+      const paymentStats = await Payment.aggregate([
+        {
+          $group: {
+            _id: "$paymentMethod",
+            count: { $sum: 1 },
+            totalAmount: { $sum: "$amount" },
+          },
+        },
+      ]);
 
       // Format status data
-      const statuses = {}
+      const statuses = {};
       ordersByStatus.forEach((item) => {
-        statuses[item._id] = item.count
-      })
+        statuses[item._id] = item.count;
+      });
 
       // Get recent orders
       const recentOrders = await Order.find()
         .populate("user", "name email")
         .populate("products.product", "name")
         .sort({ createdAt: -1 })
-        .limit(5)
+        .limit(5);
 
       return res.status(200).json({
         totalOrders,
         totalRevenue,
         statuses,
+        paymentStats,
         recentOrders,
-      })
+      });
     } catch (error) {
-      console.error("Error fetching order stats:", error)
-      return res.status(500).json({ error: "Failed to fetch order statistics" })
+      console.error("Error fetching order stats:", error);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch order statistics" });
     }
   }
 
   async getUserOrders(req, res) {
     try {
-      const { userId } = req.params
+      const { userId } = req.params;
 
       const orders = await Order.find({ user: userId })
         .populate("products.product", "name price images mainImage")
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 });
 
-      return res.status(200).json(orders)
+      // Get payment information for each order
+      const ordersWithPayments = await Promise.all(
+        orders.map(async (order) => {
+          const payment = await Payment.findOne({ order: order._id });
+          return {
+            ...order.toObject(),
+            payment: payment || null,
+          };
+        })
+      );
+
+      return res.status(200).json(ordersWithPayments);
     } catch (error) {
-      console.error("Error fetching user orders:", error)
-      return res.status(500).json({ error: "Failed to fetch user orders" })
+      console.error("Error fetching user orders:", error);
+      return res.status(500).json({ error: "Failed to fetch user orders" });
     }
   }
 }
 
-export default OrderController
+export default OrderController;

@@ -4,7 +4,6 @@ const orderSchema = new mongoose.Schema(
   {
     orderNumber: {
       type: String,
-      required: true,
       unique: true,
     },
     user: {
@@ -12,6 +11,10 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    phone: {
+      type: String,
+      required: true,
+    }, 
     products: [
       {
         product: {
@@ -41,11 +44,10 @@ const orderSchema = new mongoose.Schema(
       district: String,
       zipCode: String,
       country: String,
-      phone: String,
     },
     paymentMethod: {
       type: String,
-      enum: ["eSewa","cash_on_delivery"],
+      enum: ["esewa", "cash_on_delivery"],
       default: "cash_on_delivery",
     },
     paymentStatus: {
@@ -57,6 +59,14 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["processing", "shipped", "delivered", "cancelled"],
       default: "processing",
+    },
+    transactionId: {
+      type: String,
+      default: null,
+    },
+    paymentGatewayResponse: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
     notes: String,
     trackingNumber: String,
@@ -75,7 +85,6 @@ orderSchema.pre("save", async function (next) {
     const month = (date.getMonth() + 1).toString().padStart(2, "0")
     const day = date.getDate().toString().padStart(2, "0")
 
-    // Get the count of orders for today to generate a sequential number
     const count = await this.constructor.countDocuments({
       createdAt: {
         $gte: new Date(date.setHours(0, 0, 0, 0)),
@@ -83,10 +92,10 @@ orderSchema.pre("save", async function (next) {
       },
     })
 
-    // Format: WH-YYMMDD-XXXX (XXXX is a sequential number)
     this.orderNumber = `WH-${year}${month}${day}-${(count + 1).toString().padStart(4, "0")}`
   }
   next()
 })
+
 
 export default mongoose.model("Order", orderSchema)
