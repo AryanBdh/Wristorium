@@ -19,6 +19,7 @@ import Checkout from "./Components/Checkout";
 import EsewaCallback from "./esewa/EsewaCallback";
 import OrderSuccess from "./esewa/OrderSuccess";
 import EditProduct from "./Admin/EditProduct";
+import SmartCollection from "./Collections/SmartCollection";
 
 const RouterComponent = () => {
   return (
@@ -69,6 +70,8 @@ const RouterComponent = () => {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/collections/men" element={<MensCollection />} />
         <Route path="/collections/women" element={<WomensCollection />} />
+        <Route path="/collections/smart" element={<SmartCollection />} />
+
       </Routes>
     </div>
   );

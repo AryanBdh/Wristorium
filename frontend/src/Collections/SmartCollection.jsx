@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Search, Filter, ShoppingBag, Grid, List, Sparkles } from "lucide-react"
+import { Search, Filter, ShoppingBag, Grid, List, Zap } from "lucide-react"
 import { Link } from "react-router-dom"
 import Button from "../ui/Button"
 import Input from "../ui/Input"
@@ -16,7 +16,7 @@ const getProductImageUrl = (imageName) => {
   return `http://localhost:5000/products/${imageName}`
 }
 
-const WomensCollection = () => {
+const SmartCollection = () => {
   const { addToCart, isLoading: cartLoading, isLoaded: cartLoaded } = useCart()
 
   const [products, setProducts] = useState([])
@@ -40,14 +40,14 @@ const WomensCollection = () => {
       setLoadingProducts(true)
       setProductsError(null)
       try {
-        const response = await fetch(`http://localhost:5000/api/products?category=women`)
+        const response = await fetch(`http://localhost:5000/api/products?category=smart`)
         if (!response.ok) {
-          throw new Error("Failed to fetch women's products from database.")
+          throw new Error("Failed to fetch smart products from database.")
         }
         const data = await response.json()
         setProducts(data.products)
       } catch (error) {
-        console.error("Error fetching women's products:", error)
+        console.error("Error fetching smart products:", error)
         setProductsError(error.message)
         setProducts([]) // Fallback to empty if DB fails
       } finally {
@@ -64,7 +64,7 @@ const WomensCollection = () => {
     return token && user
   }
 
-  // Get unique subcategories for women's watches
+  // Get unique subcategories for smart watches
   const subCategories = useMemo(() => {
     return [...new Set(products.map((product) => product.collection))].filter(Boolean)
   }, [products])
@@ -173,30 +173,36 @@ const WomensCollection = () => {
       <Header />
       <div className="bg-[#0a0e17] text-white min-h-screen">
         {/* Hero Section */}
-        <section className="relative h-[40vh] overflow-hidden bg-gradient-to-r from-[#0a0e17] via-[#2a1f3d] to-[#0a0e17]">
+        <section className="relative h-[40vh] overflow-hidden bg-gradient-to-r from-[#0a0e17] via-[#3a2a4d] to-[#0a0e17]">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center max-w-4xl px-4">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Sparkles className="h-8 w-8 text-[#d4af37]" />
+                <Zap className="h-8 w-8 text-[#d4af37]" />
                 <h1 className="text-5xl md:text-6xl font-bold">
-                  Women's <span className="text-[#d4af37]">Collection</span>
+                  Smart <span className="text-[#d4af37]">Collection</span>
                 </h1>
-                <Sparkles className="h-8 w-8 text-[#d4af37]" />
+                <Zap className="h-8 w-8 text-[#d4af37]" />
               </div>
-              <p className="text-xl text-gray-200 mb-6">Elegant timepieces designed for the sophisticated woman</p>
+              <p className="text-xl text-gray-200 mb-6">Innovative timepieces for the connected lifestyle</p>
               <div className="flex items-center justify-center gap-8 text-sm text-gray-300">
-                <div className="w-2 h-2 bg-[#d4af37] rounded-full"></div>
-                <span>{products.length} Watches</span>
-                <div className="w-2 h-2 bg-[#d4af37] rounded-full"></div>
-                <span>Elegant Design</span>
-                <div className="w-2 h-2 bg-[#d4af37] rounded-full"></div>
-                <span>Premium Materials</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#d4af37] rounded-full"></div>
+                  <span>{products.length} Smart Devices</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#d4af37] rounded-full"></div>
+                  <span>Cutting-Edge Tech</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#d4af37] rounded-full"></div>
+                  <span>Seamless Integration</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8">
           {/* Login Notice for Non-Authenticated Users */}
           {!isLoggedIn() && (
             <div className="mb-6 p-4 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg">
@@ -229,7 +235,7 @@ const WomensCollection = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search women's watches..."
+                  placeholder="Search smart devices..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-full"
@@ -339,7 +345,7 @@ const WomensCollection = () => {
             <div className="flex items-center justify-between text-sm text-gray-400">
               <span>
                 Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredProducts.length)} of{" "}
-                {filteredProducts.length} women's watches
+                {filteredProducts.length} smart devices
               </span>
               {(searchTerm || selectedSubCategory !== "all") && (
                 <button onClick={clearFilters} className="text-[#d4af37] hover:underline">
@@ -353,7 +359,7 @@ const WomensCollection = () => {
           {loadingProducts ? (
             <div className="text-center py-16">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4af37] mx-auto mb-4"></div>
-              <p className="text-white">Loading women's watches...</p>
+              <p className="text-white">Loading smart devices...</p>
             </div>
           ) : productsError ? (
             <div className="text-center py-16">
@@ -365,7 +371,7 @@ const WomensCollection = () => {
             </div>
           ) : paginatedProducts.length === 0 ? (
             <div className="text-center py-16">
-              <h3 className="text-xl font-semibold mb-2">No women's watches found</h3>
+              <h3 className="text-xl font-semibold mb-2">No smart devices found</h3>
               <p className="text-gray-400 mb-4">Try adjusting your search or filter criteria</p>
               <Button onClick={clearFilters} className="bg-[#d4af37] hover:bg-[#b8973a] text-black">
                 Clear Filters
@@ -400,7 +406,7 @@ const WomensCollection = () => {
 
                     {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-col gap-1">
-                      {product.isNewProduct && <span className="bg-[#d4af37] text-black text-xs px-2 py-1 rounded">NEW</span>}
+                      {product.isNew && <span className="bg-[#d4af37] text-black text-xs px-2 py-1 rounded">NEW</span>}
                       {product.isSale && <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">SALE</span>}
                     </div>
                   </div>
@@ -417,6 +423,7 @@ const WomensCollection = () => {
                       </div>
                     </div>
 
+                    <p className="text-sm text-gray-400 mb-3 capitalize">{product.collection} Collection</p>
 
                     {viewMode === "list" && <p className="text-sm text-gray-300 mb-4">{product.description}</p>}
 
@@ -506,4 +513,4 @@ const WomensCollection = () => {
   )
 }
 
-export default WomensCollection
+export default SmartCollection

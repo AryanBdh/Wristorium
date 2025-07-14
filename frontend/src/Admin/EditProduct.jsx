@@ -191,7 +191,7 @@ const EditProduct = () => {
 
       case "sku":
         if (value) {
-          const val = value.toString().trim(); // 👈 Convert to string safely
+          const val = value.toString().trim(); 
 
           if (val.length < 3) return "SKU must be at least 3 characters";
           if (val.length > 50) return "SKU must be less than 50 characters";

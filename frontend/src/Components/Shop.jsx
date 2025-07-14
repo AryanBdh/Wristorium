@@ -200,21 +200,6 @@ const Shop = () => {
         </section>
 
         <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Data Source Indicator */}
-          <div className="mb-4">
-            {dataSource === "database" && (
-              <span className="inline-flex items-center px-3 py-1 bg-green-600 text-white text-sm rounded-full">
-                🔴 LIVE DATA
-              </span>
-            )}
-            {dataSource === "static" && (
-              <span className="inline-flex items-center px-3 py-1 bg-yellow-600 text-white text-sm rounded-full">
-                📦 STATIC DATA
-              </span>
-            )}
-          </div>
-
-          {/* Login Notice for Non-Authenticated Users */}
           {!isLoggedIn() && (
             <div className="mb-6 p-4 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg">
               <div className="flex items-center gap-3">
@@ -434,10 +419,7 @@ const Shop = () => {
                           )}
                           {product.isSale && (
                             <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">SALE</span>
-                          )}
-                          {dataSource === "database" && (
-                            <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">LIVE</span>
-                          )}
+                          )}                         
                         </div>
                       </div>
 
