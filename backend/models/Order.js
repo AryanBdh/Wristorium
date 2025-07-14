@@ -70,6 +70,10 @@ const orderSchema = new mongoose.Schema(
     },
     notes: String,
     trackingNumber: String,
+    deliveryDate: {
+      type: Date,
+      default: null,
+    },
   },
   {
     versionKey: false,

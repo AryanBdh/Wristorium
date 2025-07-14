@@ -148,16 +148,7 @@ const WomensCollection = () => {
     console.log("🛒 Adding product to cart:", product)
     const success = await addToCart(product, 1)
 
-    if (success) {
-      console.log("✅ Successfully added to cart")
-      toast.success(`${product.name} added to cart!`, {
-        id: "cart-success",
-        duration: 3000,
-        icon: "🛒",
-      })
-    } else {
-      console.log("❌ Failed to add to cart")
-    }
+    
   }
 
   // Get min and max prices from fetched products

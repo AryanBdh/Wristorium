@@ -581,13 +581,13 @@ const AdminDashboard = () => {
                               <div className="flex gap-2">
                                 <button
                                   className="text-gray-400 hover:text-[#d4af37]"
-                                  onClick={() => navigate(`/admin/orders/${order._id}`)}
+                                  onClick={() => navigate(`/dashboard/orders/${order._id}`)}
                                 >
                                   <Eye className="h-4 w-4" />
                                 </button>
                                 <button
                                   className="text-gray-400 hover:text-[#d4af37]"
-                                  onClick={() => navigate(`/admin/orders/${order._id}/edit`)}
+                                  onClick={() => navigate(`/dashboard/orders/${order._id}/edit`)}
                                 >
                                   <Edit className="h-4 w-4" />
                                 </button>

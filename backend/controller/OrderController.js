@@ -142,6 +142,9 @@ class OrderController {
 
       const roundedTotal=Number(totalAmount.toFixed(2));
 
+      const estimatedDeliveryDate = new Date()
+      estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 5)
+
       // Create order with all required fields
       const order = new Order({
         orderNumber: generateOrderNumber(),
@@ -162,6 +165,7 @@ class OrderController {
           paymentMethod === "cash_on_delivery" ? "pending" : "pending",
         status: "processing",
         notes: notes || "",
+        deliveryDate: estimatedDeliveryDate,
       });
 
       console.log("Creating order:", order);
@@ -197,6 +201,7 @@ class OrderController {
             createdAt: order.createdAt,
             products: order.products,
             shippingAddress: order.shippingAddress,
+            deliveryDate: order.deliveryDate,
           },
           payment: {
             _id: payment._id,
@@ -223,6 +228,7 @@ class OrderController {
           createdAt: order.createdAt,
           products: order.products,
           shippingAddress: order.shippingAddress,
+          deliveryDate: order.deliveryDate,
         },
         payment: {
           _id: payment._id,
@@ -246,7 +252,7 @@ class OrderController {
   async update(req, res) {
     try {
       const { id } = req.params;
-      const { status, paymentStatus, trackingNumber, notes, transactionId } =
+      const { status, paymentStatus, trackingNumber, notes, transactionId, deliveryDate } =
         req.body;
 
       const order = await Order.findById(id);
@@ -261,19 +267,25 @@ class OrderController {
       if (trackingNumber) order.trackingNumber = trackingNumber;
       if (notes) order.notes = notes;
       if (transactionId) order.transactionId = transactionId;
+      if (deliveryDate) order.deliveryDate = deliveryDate;
+
+      if (order.paymentMethod === "cash_on_delivery" && status === "delivered" && order.paymentStatus !== "paid") {
+        order.paymentStatus = "paid" 
+        console.log(`COD order ${order.orderNumber} marked as paid upon delivery.`)
+      }
 
       await order.save();
 
       // Update payment record if payment status changed
-      if (paymentStatus || transactionId) {
-        const updateData = {};
-        if (paymentStatus) updateData.status = paymentStatus;
-        if (transactionId) updateData.transactionId = transactionId;
-        if (paymentStatus === "paid") updateData.paidAt = new Date();
+      if (paymentStatus || transactionId || (order.paymentMethod === "cash_on_delivery" && status === "delivered")) {
+        const updateData = {}
+        if (paymentStatus) updateData.status = paymentStatus
+        if (transactionId) updateData.transactionId = transactionId
+        if (paymentStatus === "paid" || (order.paymentMethod === "cash_on_delivery" && status === "delivered")) {
+          updateData.paidAt = new Date()
+        }
 
-        await Payment.findOneAndUpdate({ order: id }, updateData, {
-          new: true,
-        });
+        await Payment.findOneAndUpdate({ order: id }, updateData, { new: true })
       }
 
       return res.status(200).json({

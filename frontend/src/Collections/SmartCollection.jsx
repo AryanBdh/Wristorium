@@ -148,16 +148,7 @@ const SmartCollection = () => {
     console.log("🛒 Adding product to cart:", product)
     const success = await addToCart(product, 1)
 
-    if (success) {
-      console.log("✅ Successfully added to cart")
-      toast.success(`${product.name} added to cart!`, {
-        id: "cart-success",
-        duration: 3000,
-        icon: "🛒",
-      })
-    } else {
-      console.log("❌ Failed to add to cart")
-    }
+    
   }
 
   // Get min and max prices from fetched products
@@ -202,7 +193,7 @@ const SmartCollection = () => {
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Login Notice for Non-Authenticated Users */}
           {!isLoggedIn() && (
             <div className="mb-6 p-4 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg">
@@ -287,23 +278,6 @@ const SmartCollection = () => {
             {showFilters && (
               <div className="bg-[#0f1420] rounded-lg p-6 mb-6 border border-gray-800">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  {/* Collection Filter */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Collection</label>
-                    <select
-                      value={selectedSubCategory}
-                      onChange={(e) => setSelectedSubCategory(e.target.value)}
-                      className="w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 text-sm"
-                    >
-                      <option value="all">All Collections</option>
-                      {subCategories.map((collection) => (
-                        <option key={collection} value={collection}>
-                          {collection.charAt(0).toUpperCase() + collection.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* Price Range */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">
@@ -371,7 +345,7 @@ const SmartCollection = () => {
             </div>
           ) : paginatedProducts.length === 0 ? (
             <div className="text-center py-16">
-              <h3 className="text-xl font-semibold mb-2">No smart devices found</h3>
+              <h3 className="text-xl font-semibold mb-2">No smart watches found</h3>
               <p className="text-gray-400 mb-4">Try adjusting your search or filter criteria</p>
               <Button onClick={clearFilters} className="bg-[#d4af37] hover:bg-[#b8973a] text-black">
                 Clear Filters

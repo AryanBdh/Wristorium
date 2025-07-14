@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import Button from "../ui/Button"
-import { CheckCircle, Loader, Package } from "lucide-react"
+import { CheckCircle, Loader, Package, Truck } from "lucide-react" // Import Truck icon
 
 const OrderSuccess = () => {
   const { orderId } = useParams()
@@ -41,6 +41,15 @@ const OrderSuccess = () => {
       fetchOrderDetails()
     }
   }, [orderId])
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A"
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
 
   if (loading) {
     return (
@@ -117,8 +126,18 @@ const OrderSuccess = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Order Date:</span>
-                    <span className="text-white">{new Date(orderDetails.createdAt).toLocaleDateString()}</span>
+                    <span className="text-white">{formatDate(orderDetails.createdAt)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Estimated Delivery:</span>
+                    <span className="text-white">{formatDate(orderDetails.deliveryDate)}</span>
+                  </div>
+                  {orderDetails.trackingNumber && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Tracking Number:</span>
+                      <span className="text-white">{orderDetails.trackingNumber}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Shipping Address */}
@@ -158,10 +177,11 @@ const OrderSuccess = () => {
 
             <div className="flex gap-4 justify-center">
               <Button
-                onClick={() => (window.location.href = `/orders/${orderDetails?._id}`)}
+                onClick={() => (window.location.href = `/profile`)} // Link to user profile for order history
                 className="bg-[#d4af37] text-black hover:bg-[#b8973a]"
               >
-                View Order Details
+                <Truck className="h-4 w-4 mr-2" />
+                View My Orders
               </Button>
               <Button
                 onClick={() => (window.location.href = "/shop")}

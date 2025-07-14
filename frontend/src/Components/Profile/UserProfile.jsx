@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { User, MapPin, Package, Edit, Save, X, Eye, Home, CreditCard, Truck, AlertTriangle } from "lucide-react"
+import { User, MapPin, Package, Edit, Save, X, Eye, Home, CreditCard, Truck, AlertTriangle } from "lucide-react" // Added CalendarDays
 import Button from "../../ui/Button"
 import Input from "../../ui/Input"
 import toast from "react-hot-toast"
@@ -238,6 +238,7 @@ const UserProfile = () => {
   }
 
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A"
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -661,6 +662,36 @@ const UserProfile = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Delivery & Tracking Info */}
+                        <div className="mb-4 p-3 bg-[#1a1f2c] rounded-lg">
+                          <h4 className="font-medium mb-2 flex items-center gap-2">
+                            <Truck className="h-4 w-4" />
+                            Delivery Information
+                          </h4>
+                          <div className="text-sm text-gray-400">
+                            <div>
+                              Estimated Delivery: <span className="text-white">{formatDate(order.deliveryDate)}</span>
+                            </div>
+                            {order.trackingNumber && (
+                              <div>
+                                Tracking Number: <span className="text-white">{order.trackingNumber}</span>
+                              </div>
+                            )}
+                            {order.status === "shipped" && order.trackingNumber && (
+                              <div className="mt-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-gray-600 bg-transparent"
+                                  onClick={() => toast.info("Tracking functionality not yet implemented.")}
+                                >
+                                  Track Order
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
                         {/* Payment Information */}
                         {order.payment && (

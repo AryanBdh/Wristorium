@@ -20,6 +20,7 @@ import EsewaCallback from "./esewa/EsewaCallback";
 import OrderSuccess from "./esewa/OrderSuccess";
 import EditProduct from "./Admin/EditProduct";
 import SmartCollection from "./Collections/SmartCollection";
+import AdminOrderEdit from "./Admin/AdminOrderEdit";
 
 const RouterComponent = () => {
   return (
@@ -66,6 +67,14 @@ const RouterComponent = () => {
             </AdminRoute>
           }
         />
+         <Route
+                path="/dashboard/orders/:id/edit"
+                element={
+                  <AdminRoute>
+                    <AdminOrderEdit />
+                  </AdminRoute>
+                }
+              />
 
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/collections/men" element={<MensCollection />} />
