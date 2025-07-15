@@ -10,6 +10,9 @@ const auth = new RouteMiddleware()
 paymentRoute.post("/esewa/initiate", auth.check, paymentInstance.initiateEsewaPayment)
 paymentRoute.post("/esewa/verify", auth.check, paymentInstance.verifyEsewaPayment)
 
+
+paymentRoute.get("/esewa/success", paymentInstance.handleEsewaSuccessCallback)
+paymentRoute.get("/esewa/failure", paymentInstance.handleEsewaFailureCallback)
 // General payment routes
 paymentRoute.get("/status/:orderId", auth.check, paymentInstance.getPaymentStatus)
 

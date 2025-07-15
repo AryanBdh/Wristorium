@@ -100,6 +100,22 @@ const UserProfile = () => {
     }
   }, [user._id])
 
+  // Add this useEffect after the existing useEffects, around line 80
+  useEffect(() => {
+    if (showAddressForm) {
+      // Prevent background scrolling when modal is open
+      document.body.style.overflow = "hidden"
+    } else {
+      // Restore scrolling when modal is closed
+      document.body.style.overflow = "unset"
+    }
+
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [showAddressForm])
+
   // Handle order cancellation
   const handleCancelOrder = async (orderId) => {
     try {
@@ -376,6 +392,7 @@ const UserProfile = () => {
                     <div>
                       <label className="block text-sm font-medium mb-2">Name</label>
                       <Input
+                        name="profile-name" // Unique name to avoid conflicts
                         value={profileData.name}
                         onChange={(e) =>
                           setProfileData({
@@ -384,12 +401,14 @@ const UserProfile = () => {
                           })
                         }
                         disabled={!isEditing}
+                        autoComplete="off" // Disable autocomplete on background form
                         className={!isEditing ? "bg-[#1a1f2c] border-gray-700" : ""}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Email</label>
                       <Input
+                        name="profile-email" // Unique name to avoid conflicts
                         value={profileData.email}
                         onChange={(e) =>
                           setProfileData({
@@ -398,12 +417,14 @@ const UserProfile = () => {
                           })
                         }
                         disabled={!isEditing}
+                        autoComplete="off" // Disable autocomplete on background form
                         className={!isEditing ? "bg-[#1a1f2c] border-gray-700" : ""}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Phone</label>
                       <Input
+                        name="profile-phone" // Unique name to avoid conflicts
                         value={profileData.phone}
                         maxLength={10}
                         onChange={(e) => {
@@ -415,6 +436,7 @@ const UserProfile = () => {
                           }
                         }}
                         disabled={!isEditing}
+                        autoComplete="off" // Disable autocomplete on background form
                         className={!isEditing ? "bg-[#1a1f2c] border-gray-700" : ""}
                       />
                     </div>
@@ -802,8 +824,20 @@ const UserProfile = () => {
 
             {/* Address Form Modal */}
             {showAddressForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                <div className="bg-[#0f1420] rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                onClick={(e) => {
+                  // Close modal when clicking on backdrop
+                  if (e.target === e.currentTarget) {
+                    setShowAddressForm(false)
+                    setEditingAddress(null)
+                  }
+                }}
+              >
+                <div
+                  className="bg-[#0f1420] rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto border border-gray-700"
+                  onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside
+                >
                   <h3 className="text-lg font-semibold mb-4">
                     {editingAddress._id ? "Edit Address" : "Add New Address"}
                   </h3>
@@ -813,10 +847,12 @@ const UserProfile = () => {
                       handleSaveAddress()
                     }}
                     className="space-y-4"
+                    autoComplete="on" // Enable autocomplete for this form only
                   >
                     <div>
                       <label className="block text-sm font-medium mb-1">Type</label>
                       <Input
+                        name="address-type" // Unique name for autocomplete
                         value={editingAddress.type}
                         onChange={(e) =>
                           setEditingAddress({
@@ -825,13 +861,15 @@ const UserProfile = () => {
                           })
                         }
                         placeholder="Home, Office, etc."
+                        autoComplete="off" // Disable autocomplete for this field
                         required
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Name</label>
                       <Input
-                        value={editingAddress.name}
+                        name="address-name" // Unique name for autocomplete
+                        value={user.name}
                         onChange={(e) =>
                           setEditingAddress({
                             ...editingAddress,
@@ -839,11 +877,13 @@ const UserProfile = () => {
                           })
                         }
                         placeholder="Full name"
+                        autoComplete="name" // Enable name autocomplete
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Street</label>
                       <Input
+                        name="address-street" // Unique name for autocomplete
                         value={editingAddress.street}
                         onChange={(e) =>
                           setEditingAddress({
@@ -852,12 +892,14 @@ const UserProfile = () => {
                           })
                         }
                         placeholder="Street address"
+                        autoComplete="street-address" // Enable street address autocomplete
                         required
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">City</label>
                       <Input
+                        name="address-city" // Unique name for autocomplete
                         value={editingAddress.city}
                         onChange={(e) =>
                           setEditingAddress({
@@ -866,12 +908,14 @@ const UserProfile = () => {
                           })
                         }
                         placeholder="City"
+                        autoComplete="address-level2" // Enable city autocomplete
                         required
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">District</label>
                       <Input
+                        name="address-district" // Unique name for autocomplete
                         value={editingAddress.district}
                         onChange={(e) =>
                           setEditingAddress({
@@ -880,12 +924,14 @@ const UserProfile = () => {
                           })
                         }
                         placeholder="District"
+                        autoComplete="address-level1" // Enable state/district autocomplete
                         required
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Zip Code</label>
                       <Input
+                        name="address-zipcode" // Unique name for autocomplete
                         value={editingAddress.zipCode}
                         onChange={(e) =>
                           setEditingAddress({
@@ -894,12 +940,14 @@ const UserProfile = () => {
                           })
                         }
                         placeholder="Zip code"
+                        autoComplete="postal-code" // Enable postal code autocomplete
                         required
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Country</label>
                       <Input
+                        name="address-country" // Unique name for autocomplete
                         value={editingAddress.country}
                         onChange={(e) =>
                           setEditingAddress({
@@ -908,6 +956,7 @@ const UserProfile = () => {
                           })
                         }
                         placeholder="Country"
+                        autoComplete="country-name" // Enable country autocomplete
                         required
                       />
                     </div>
@@ -915,6 +964,7 @@ const UserProfile = () => {
                       <input
                         type="checkbox"
                         id="isDefault"
+                        name="address-default" // Unique name
                         checked={editingAddress.isDefault}
                         onChange={(e) =>
                           setEditingAddress({
@@ -937,10 +987,11 @@ const UserProfile = () => {
                           setShowAddressForm(false)
                           setEditingAddress(null)
                         }}
+                        className="border-gray-600 bg-transparent"
                       >
                         Cancel
                       </Button>
-                      <Button type="submit" className="bg-[#d4af37] text-black">
+                      <Button type="submit" className="bg-[#d4af37] text-black hover:bg-[#b8973a]">
                         Save Address
                       </Button>
                     </div>

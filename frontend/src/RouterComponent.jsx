@@ -16,8 +16,8 @@ import MensCollection from "./Collections/MensCollection";
 import WomensCollection from "./Collections/WomensCollection";
 import ScrollToTop from "./ScrollToTop";
 import Checkout from "./Components/Checkout";
-import EsewaCallback from "./esewa/EsewaCallback";
-import OrderSuccess from "./esewa/OrderSuccess";
+import EsewaFailure from "./esewa/EsewaFailure";
+import EsewaSuccess from "./esewa/EsewaSuccess";
 import EditProduct from "./Admin/EditProduct";
 import SmartCollection from "./Collections/SmartCollection";
 import AdminOrderEdit from "./Admin/AdminOrderEdit";
@@ -39,8 +39,8 @@ const RouterComponent = () => {
         <Route path="/checkout" element={<Checkout />} />
 
         {/* Payment Routes */}
-        <Route path="/payment/esewa/callback" element={<EsewaCallback />} />
-        <Route path="/order/success/:orderId" element={<OrderSuccess />} />
+        <Route path="/esewa/success" element={<EsewaSuccess />} />
+        <Route path="/esewa/failure" element={<EsewaFailure />} />
 
         {/* Protected Routes */}
         <Route
@@ -67,20 +67,19 @@ const RouterComponent = () => {
             </AdminRoute>
           }
         />
-         <Route
-                path="/dashboard/orders/:id/edit"
-                element={
-                  <AdminRoute>
-                    <AdminOrderEdit />
-                  </AdminRoute>
-                }
-              />
+        <Route
+          path="/dashboard/orders/:id/edit"
+          element={
+            <AdminRoute>
+              <AdminOrderEdit />
+            </AdminRoute>
+          }
+        />
 
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/collections/men" element={<MensCollection />} />
         <Route path="/collections/women" element={<WomensCollection />} />
         <Route path="/collections/smart" element={<SmartCollection />} />
-
       </Routes>
     </div>
   );

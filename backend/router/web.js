@@ -22,7 +22,7 @@ webRouter.use('/register', registerRoute);
 webRouter.use('/products', productRoute);
 webRouter.use('/orders', orderRoute);
 webRouter.use("/cart", cartRoute)
-webRouter.use("/payment", paymentRoute);
+webRouter.use("/payments", paymentRoute);
 
 
 export default webRouter;

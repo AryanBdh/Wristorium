@@ -62,10 +62,10 @@ const ProductDetail = () => {
           setProduct(productData)
 
           // Fetch related products from the same collection
-          if (productData.collection) {
+          if (productData.category) {
             try {
               const relatedResponse = await fetch(
-                `http://localhost:3000/products?collection=${encodeURIComponent(productData.collection)}&limit=5`,
+                `http://localhost:5000/api/products?category=${encodeURIComponent(productData.category)}&limit=5`,
               )
 
               if (relatedResponse.ok) {
@@ -207,6 +207,46 @@ const ProductDetail = () => {
     }
 
     
+  }
+
+  const getRelatedProductImage = (relatedProduct) => {
+    console.log("Getting image for related product:", relatedProduct)
+
+    if (relatedProduct._id) {
+      // Database product
+      if (relatedProduct.images && relatedProduct.images.length > 0) {
+        const firstImage = relatedProduct.images[0]
+        console.log("First image:", firstImage)
+
+        if (typeof firstImage === "string") {
+          const imageUrl = firstImage.startsWith("http") ? firstImage : `http://localhost:5000/products/${firstImage}`
+          console.log("Constructed image URL (string):", imageUrl)
+          return imageUrl
+        } else if (firstImage && firstImage.url) {
+          const imageUrl = firstImage.url.startsWith("http")
+            ? firstImage.url
+            : `http://localhost:5000/products/${firstImage.url}`
+          console.log("Constructed image URL (object):", imageUrl)
+          return imageUrl
+        }
+      }
+
+      if (relatedProduct.mainImage) {
+        const imageUrl = relatedProduct.mainImage.startsWith("http")
+          ? relatedProduct.mainImage
+          : `http://localhost:5000/products/${relatedProduct.mainImage}`
+        console.log("Main image URL:", imageUrl)
+        return imageUrl
+      }
+
+      console.log("No image found for database product, using placeholder")
+      return "/placeholder.svg?height=300&width=300"
+    } else {
+      // Static product
+      const imageUrl = relatedProduct.image || "/placeholder.svg?height=300&width=300"
+      console.log("Static product image URL:", imageUrl)
+      return imageUrl
+    }
   }
 
 
@@ -695,11 +735,7 @@ const ProductDetail = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedProducts.map((relatedProduct) => {
                   const relatedId = relatedProduct._id || relatedProduct.id
-                  const relatedImage = relatedProduct._id
-                    ? relatedProduct.mainImage
-                      ? `http://localhost:3000/products/${relatedProduct.mainImage}`
-                      : "/placeholder.svg?height=300&width=300"
-                    : relatedProduct.image || "/placeholder.svg?height=300&width=300"
+                  const relatedImage = getRelatedProductImage(relatedProduct)
 
                   return (
                     <Link
@@ -713,6 +749,7 @@ const ProductDetail = () => {
                           alt={relatedProduct.name}
                           className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"
                           onError={(e) => {
+                            console.log("Related product image failed to load:", e.target.src)
                             e.target.src = "/placeholder.svg?height=300&width=300"
                           }}
                         />
@@ -721,12 +758,17 @@ const ProductDetail = () => {
                             NEW
                           </span>
                         )}
+                        {relatedProduct.isSale && (
+                          <span className="absolute top-3 right-3 bg-red-600 text-white text-xs px-2 py-1 rounded">
+                            SALE
+                          </span>
+                        )}
                       </div>
                       <div className="p-4">
                         <h3 className="font-medium mb-2 group-hover:text-[#d4af37] transition-colors">
                           {relatedProduct.name}
                         </h3>
-                        
+
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-[#d4af37]">Rs.{relatedProduct.price?.toLocaleString()}</span>
                           <div className="flex items-center gap-1">
