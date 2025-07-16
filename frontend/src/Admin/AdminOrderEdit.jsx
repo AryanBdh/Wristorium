@@ -339,41 +339,7 @@ const AdminOrderEdit = () => {
               </div>
             )}
 
-            {/* Payment Details */}
-            {order?.payment && (
-              <div className="bg-[#0f1420] rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Payment Details
-                </h2>
-                <div className="text-sm text-gray-300 space-y-1">
-                  <p>
-                    Method:{" "}
-                    <span className="capitalize">
-                      {order.payment.paymentMethod?.replace("_", " ")}
-                    </span>
-                  </p>
-                  <p>
-                    Status:{" "}
-                    <span className={getStatusColor(order.payment.status)}>
-                      {order.payment.status}
-                    </span>
-                  </p>
-                  <p>
-                    Amount:{" "}
-                    <span className="text-[#d4af37]">
-                      Rs. {order.payment.amount?.toLocaleString()}
-                    </span>
-                  </p>
-                  {order.payment.transactionId && (
-                    <p>Transaction ID: {order.payment.transactionId}</p>
-                  )}
-                  {order.payment.paidAt && (
-                    <p>Paid At: {formatDate(order.payment.paidAt)}</p>
-                  )}
-                </div>
-              </div>
-            )}
+            
           </div>
 
           {/* Update Form Column */}

@@ -12,7 +12,6 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
   })
 
   const [errors, setErrors] = useState({})
@@ -20,7 +19,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const {loadCart} = useCart() 
+  const { loadCart } = useCart()
 
   // Validation rules
   const validateField = (name, value) => {
@@ -44,28 +43,26 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {}
     Object.keys(formData).forEach((key) => {
-      if (key !== "rememberMe") {
-        const error = validateField(key, formData[key])
-        if (error) newErrors[key] = error
-      }
+      const error = validateField(key, formData[key])
+      if (error) newErrors[key] = error
     })
     return newErrors
   }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    const newValue = type === "checkbox" ? checked : value
+    const newValue = value
 
     setFormData((prev) => ({ ...prev, [name]: newValue }))
 
     // Real-time validation for non-checkbox fields
-    if (type !== "checkbox" && touched[name]) {
+    if (touched[name]) {
       const error = validateField(name, newValue)
       setErrors((prev) => ({ ...prev, [name]: error }))
     }
   }
 
-  const handleBlur = async(e) => {
+  const handleBlur = async (e) => {
     const { name, value } = e.target
     setTouched((prev) => ({ ...prev, [name]: true }))
 
@@ -132,7 +129,7 @@ const Login = () => {
       // Save user profile to localStorage
       localStorage.setItem("user", JSON.stringify(userProfile))
 
-      await loadCart(); // Load cart items after login
+      await loadCart() // Load cart items after login
 
       toast.success("Login successful! Welcome back.", {
         id: "login-success",
@@ -146,17 +143,6 @@ const Login = () => {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const getFieldClassName = (fieldName) => {
-    const baseClass = ""
-    if (errors[fieldName] && touched[fieldName]) {
-      return `${baseClass} border-red-500 focus:border-red-500 focus:ring-red-500`
-    }
-    if (!errors[fieldName] && touched[fieldName] && formData[fieldName]) {
-      return `${baseClass} border-green-500 focus:border-green-500 focus:ring-green-500`
-    }
-    return baseClass
   }
 
   return (
@@ -195,7 +181,7 @@ const Login = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="your.email@example.com"
-                      className={`pl-10 ${getFieldClassName("email")}`}
+                      className="pl-10 w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d4af37] focus:border-[#d4af37]"
                       aria-invalid={errors.email && touched.email ? "true" : "false"}
                       aria-describedby={errors.email && touched.email ? "email-error" : undefined}
                     />
@@ -233,7 +219,7 @@ const Login = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="••••••••"
-                      className={`pl-10 pr-10 ${getFieldClassName("password")}`}
+                      className="pl-10 pr-10 w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d4af37] focus:border-[#d4af37]"
                       aria-invalid={errors.password && touched.password ? "true" : "false"}
                       aria-describedby={errors.password && touched.password ? "password-error" : undefined}
                     />
@@ -252,20 +238,6 @@ const Login = () => {
                       {errors.password}
                     </p>
                   )}
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    id="rememberMe"
-                    name="rememberMe"
-                    type="checkbox"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
-                    className="h-4 w-4 rounded border-gray-600 bg-[#1a1f2c] text-[#d4af37] focus:ring-[#d4af37]"
-                  />
-                  <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-300">
-                    Remember me
-                  </label>
                 </div>
 
                 <Button

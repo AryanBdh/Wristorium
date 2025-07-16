@@ -395,7 +395,6 @@ const AddProduct = () => {
       const data = await response.json()
 
       toast.success("Product added successfully!", {
-        icon: "✅",
         id: "product-add-success",
       })
 

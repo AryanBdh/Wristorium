@@ -11,12 +11,10 @@ class CartController {
       let cart = await Cart.findOne({ userId }).populate("items.productId")
 
       if (!cart) {
-        // Create empty cart if doesn't exist
         cart = new Cart({ userId, items: [] })
         await cart.save()
       }
 
-      // Process cart items (use snapshot if product deleted)
       const processedItems = cart.items.map((item) => {
         if (item.productId) {
           return {
@@ -27,7 +25,6 @@ class CartController {
             addedAt: item.addedAt,
           }
         } else {
-          // Product deleted, use snapshot
           return {
             _id: item._id,
             productId: item.productId,
@@ -90,13 +87,11 @@ class CartController {
         })
       }
 
-      // Find or create cart
       let cart = await Cart.findOne({ userId })
       if (!cart) {
         cart = new Cart({ userId, items: [] })
       }
 
-      // Check if item already in cart
       const existingItemIndex = cart.items.findIndex((item) => item.productId.toString() === productId)
 
       if (existingItemIndex > -1) {
@@ -133,7 +128,6 @@ class CartController {
       console.log("Cart saved:", JSON.stringify(cart, null, 2));
 
 
-      // Return updated cart with populated products
       await cart.populate("items.productId")
 
       res.json({

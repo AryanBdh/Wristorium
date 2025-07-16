@@ -140,7 +140,6 @@ const SmartCollection = () => {
       toast.error("Please log in to add items to your cart", {
         id: "login-required-cart",
         duration: 4000,
-        icon: "🔒",
       })
       return
     }
@@ -397,7 +396,6 @@ const SmartCollection = () => {
                       </div>
                     </div>
 
-                    <p className="text-sm text-gray-400 mb-3 capitalize">{product.collection} Collection</p>
 
                     {viewMode === "list" && <p className="text-sm text-gray-300 mb-4">{product.description}</p>}
 

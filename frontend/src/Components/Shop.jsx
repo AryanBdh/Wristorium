@@ -147,7 +147,6 @@ const Shop = () => {
       toast.error("Please log in to add items to your cart", {
         id: "login-required-cart",
         duration: 4000,
-        icon: "🔒",
       })
       return
     }

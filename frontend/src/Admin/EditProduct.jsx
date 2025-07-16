@@ -523,7 +523,6 @@ const EditProduct = () => {
       const data = await response.json();
 
       toast.success("Product updated successfully!", {
-        icon: "✅",
         id: "product-update-success",
       });
 

@@ -8,11 +8,9 @@ class OrderController {
     try {
       const { status, sort, limit = 50, page = 1 } = req.query;
 
-      // Build query
       const query = {};
       if (status) query.status = status;
 
-      // Build sort options
       let sortOptions = {};
       if (sort) {
         switch (sort) {
@@ -29,16 +27,14 @@ class OrderController {
             sortOptions = { totalAmount: 1 };
             break;
           default:
-            sortOptions = { createdAt: -1 }; // Default sort by newest
+            sortOptions = { createdAt: -1 }; 
         }
       } else {
-        sortOptions = { createdAt: -1 }; // Default sort by newest
+        sortOptions = { createdAt: -1 }; 
       }
 
-      // Calculate pagination
       const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit);
 
-      // Execute query with population
       const orders = await Order.find(query)
         .populate("user", "name email")
         .populate("products.product", "name price images mainImage")
@@ -75,7 +71,6 @@ class OrderController {
         return res.status(404).json({ error: "Order not found" });
       }
 
-      // Also get payment information
       const payment = await Payment.findOne({ order: id });
 
       return res.status(200).json({
@@ -95,7 +90,6 @@ class OrderController {
 
       console.log("Received order data:", req.body);
 
-      // Verify user exists
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -104,7 +98,6 @@ class OrderController {
       let totalAmount = 0;
       const orderProducts = [];
 
-      // Process each product
       for (const item of products) {
         const product = await Product.findById(item.productId);
         if (!product) {
@@ -129,14 +122,14 @@ class OrderController {
         product.stock -= item.quantity;
         await product.save();
 
-        totalAmount += product.price * item.quantity * 1.13; // Including 13% VAT
+        totalAmount += product.price * item.quantity * 1.13; 
       }
 
       const generateOrderNumber = () => {
         const now = new Date();
-        const datePart = now.toISOString().slice(2, 10).replace(/-/g, ""); // "250714"
-        const timePart = now.getTime().toString().slice(-5); // "randomish"
-        const random = Math.floor(100 + Math.random() * 900); // 3-digit random
+        const datePart = now.toISOString().slice(2, 10).replace(/-/g, ""); 
+        const timePart = now.getTime().toString().slice(-5); 
+        const random = Math.floor(100 + Math.random() * 900); 
         return `WH-${datePart}-${timePart}${random}`;
       };
 
@@ -170,7 +163,6 @@ class OrderController {
 
       console.log("Creating order:", order);
 
-      // Save the order (this will trigger the pre-save hook to generate orderNumber)
       await order.save();
 
       console.log("Order saved with orderNumber:", order.orderNumber);
@@ -210,7 +202,7 @@ class OrderController {
             amount: payment.amount,
             createdAt: payment.createdAt,
           },
-          isDirectSuccess: true, // Flag to indicate immediate success
+          isDirectSuccess: true, 
         });
       }
 
@@ -310,7 +302,6 @@ class OrderController {
 
       console.log(`Attempting to cancel order ${id} for user ${userId}`)
 
-      // Find the order and populate product details
       const order = await Order.findById(id).populate("products.product")
 
       if (!order) {
@@ -350,7 +341,6 @@ class OrderController {
         }
       }
 
-      // Delete the payment record first (due to foreign key constraint)
       const paymentDeleted = await Payment.findOneAndDelete({ order: id })
       console.log("Payment record deleted:", paymentDeleted ? "Yes" : "No")
 

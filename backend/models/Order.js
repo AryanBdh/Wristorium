@@ -81,7 +81,6 @@ const orderSchema = new mongoose.Schema(
   },
 )
 
-// Generate a unique order number before saving
 orderSchema.pre("save", async function (next) {
   if (!this.orderNumber) {
     const date = new Date()

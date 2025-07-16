@@ -45,6 +45,15 @@ const CollectionDropdown = () => {
                 Women's Collection
               </Link>
             </li>
+            <li>
+              <Link
+                to="/collections/smart"
+                className="block px-4 py-2 hover:text-[#B1976B] transition cursor-pointer"
+                onClick={() => setIsOpen(false)} // Close after selecting
+              >
+                Smart's Collection
+              </Link>
+            </li>
           </ul>
         </div>
       )}

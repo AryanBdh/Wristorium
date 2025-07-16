@@ -192,7 +192,6 @@ const Register = () => {
       localStorage.setItem("user", JSON.stringify(userProfile))
 
       toast.success("Registration successful! Welcome to WHRISTORIUM.", {
-        icon: "✨",
         id: "register-success",
       })
 
@@ -207,16 +206,7 @@ const Register = () => {
     }
   }
 
-  const getFieldClassName = (fieldName) => {
-    const baseClass = ""
-    if (errors[fieldName] && touched[fieldName]) {
-      return `${baseClass} border-red-500 focus:border-red-500 focus:ring-red-500`
-    }
-    if (!errors[fieldName] && touched[fieldName] && formData[fieldName]) {
-      return `${baseClass} border-green-500 focus:border-green-500 focus:ring-green-500`
-    }
-    return baseClass
-  }
+ 
 
   return (
     <>
@@ -255,7 +245,7 @@ const Register = () => {
                         onChange={handleChange}
                         onBlur={handleBlur}
                         placeholder="Ram"
-                        className={`pl-10 ${getFieldClassName("firstName")}`}
+                        className="pl-10 pr-10 w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d4af37] focus:border-[#d4af37]"
                         aria-invalid={errors.firstName && touched.firstName ? "true" : "false"}
                         aria-describedby={errors.firstName && touched.firstName ? "firstName-error" : undefined}
                       />
@@ -287,7 +277,7 @@ const Register = () => {
                         onChange={handleChange}
                         onBlur={handleBlur}
                         placeholder="Shah"
-                        className={getFieldClassName("lastName")}
+                        className="pl-10 pr-10 w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d4af37] focus:border-[#d4af37]"
                         aria-invalid={errors.lastName && touched.lastName ? "true" : "false"}
                         aria-describedby={errors.lastName && touched.lastName ? "lastName-error" : undefined}
                       />
@@ -321,7 +311,7 @@ const Register = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="your.email@example.com"
-                      className={`pl-10 ${getFieldClassName("email")}`}
+                      className="pl-10 pr-10 w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d4af37] focus:border-[#d4af37]"
                       aria-invalid={errors.email && touched.email ? "true" : "false"}
                       aria-describedby={errors.email && touched.email ? "email-error" : undefined}
                     />
@@ -354,7 +344,7 @@ const Register = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="••••••••"
-                      className={`pl-10 pr-10 ${getFieldClassName("password")}`}
+                      className="pl-10 pr-10 w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d4af37] focus:border-[#d4af37]"
                       aria-invalid={errors.password && touched.password ? "true" : "false"}
                       aria-describedby={errors.password && touched.password ? "password-error" : undefined}
                     />
@@ -375,74 +365,7 @@ const Register = () => {
                     </p>
                   )}
 
-                  {/* Password Requirements */}
-                  {touched.password && (
-                    <div className="mt-2 space-y-1">
-                      <p className="text-xs text-gray-400">Password must contain:</p>
-                      <div className="grid grid-cols-1 gap-1 text-xs">
-                        <div
-                          className={`flex items-center gap-1 ${
-                            formData.password.length >= 8 ? "text-green-400" : "text-gray-400"
-                          }`}
-                        >
-                          {formData.password.length >= 8 ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <div className="h-3 w-3 border border-gray-400 rounded-full" />
-                          )}
-                          At least 8 characters
-                        </div>
-                        <div
-                          className={`flex items-center gap-1 ${
-                            /(?=.*[a-z])/.test(formData.password) ? "text-green-400" : "text-gray-400"
-                          }`}
-                        >
-                          {/(?=.*[a-z])/.test(formData.password) ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <div className="h-3 w-3 border border-gray-400 rounded-full" />
-                          )}
-                          One lowercase letter
-                        </div>
-                        <div
-                          className={`flex items-center gap-1 ${
-                            /(?=.*[A-Z])/.test(formData.password) ? "text-green-400" : "text-gray-400"
-                          }`}
-                        >
-                          {/(?=.*[A-Z])/.test(formData.password) ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <div className="h-3 w-3 border border-gray-400 rounded-full" />
-                          )}
-                          One uppercase letter
-                        </div>
-                        <div
-                          className={`flex items-center gap-1 ${
-                            /(?=.*\d)/.test(formData.password) ? "text-green-400" : "text-gray-400"
-                          }`}
-                        >
-                          {/(?=.*\d)/.test(formData.password) ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <div className="h-3 w-3 border border-gray-400 rounded-full" />
-                          )}
-                          One number
-                        </div>
-                        <div
-                          className={`flex items-center gap-1 ${
-                            /(?=.*[@$!%*?&])/.test(formData.password) ? "text-green-400" : "text-gray-400"
-                          }`}
-                        >
-                          {/(?=.*[@$!%*?&])/.test(formData.password) ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <div className="h-3 w-3 border border-gray-400 rounded-full" />
-                          )}
-                          One special character (@$!%*?&)
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  
                 </div>
 
                 <div className="space-y-2">
@@ -459,7 +382,7 @@ const Register = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="••••••••"
-                      className={`pl-10 pr-10 ${getFieldClassName("confirmPassword")}`}
+                      className="pl-10 pr-10 w-full bg-[#1a1f2c] border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#d4af37] focus:border-[#d4af37]"
                       aria-invalid={errors.confirmPassword && touched.confirmPassword ? "true" : "false"}
                       aria-describedby={
                         errors.confirmPassword && touched.confirmPassword ? "confirmPassword-error" : undefined

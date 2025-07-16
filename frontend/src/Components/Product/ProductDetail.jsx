@@ -181,15 +181,7 @@ const ProductDetail = () => {
         return [""]
       }
     }
-    // } else {
-    //   // Static product - use static image
-    //   return [
-    //     product.image || "/placeholder.svg?height=600&width=600",
-    //     "/placeholder.svg?height=600&width=600&text=Side+View",
-    //     "/placeholder.svg?height=600&width=600&text=Back+View",
-    //     "/placeholder.svg?height=600&width=600&text=Detail+View",
-    //   ]
-    // }
+    
   })()
 
   const handleAddToCart = () => {
@@ -197,7 +189,6 @@ const ProductDetail = () => {
       toast.error("Please log in to add items to your cart", {
         id: "login-required-cart",
         duration: 4000,
-        icon: "🔒",
       })
       return
     }

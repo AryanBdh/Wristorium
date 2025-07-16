@@ -45,17 +45,17 @@ const Contact = () => {
     {
       icon: <Mail className="h-6 w-6" />,
       title: "Email Us",
-      details: ["info@chronoluxe.com", "support@chronoluxe.com"],
+      details: ["info@whristorium.com", "support@whristorium.com"],
     },
     {
       icon: <Phone className="h-6 w-6" />,
       title: "Call Us",
-      details: ["+1 (555) 123-4567", "+41 22 123 4567"],
+      details: ["+977 9875621354", "+977 9864257890"],
     },
     {
       icon: <MapPin className="h-6 w-6" />,
       title: "Visit Us",
-      details: ["123 Luxury Avenue", "Geneva, Switzerland"],
+      details: ["Putalisadak", "Kathmandu, Nepal"],
     },
     {
       icon: <Clock className="h-6 w-6" />,
@@ -243,7 +243,7 @@ const Contact = () => {
                   <li>• Order status and shipping inquiries</li>
                   <li>• Warranty and repair services</li>
                   <li>• Technical support for smart timepieces</li>
-                  <li>• General questions about CHRONOLUXE</li>
+                  <li>• General questions about WHRISTORIUM</li>
                 </ul>
               </div>
             </div>
@@ -276,8 +276,8 @@ const Contact = () => {
                   Do you offer international shipping?
                 </h3>
                 <p className="text-sm text-gray-300">
-                  Yes, we ship worldwide. Free shipping is available on orders
-                  over $500.
+                  No, we currently ship only within Nepal. We plan to expand
+                  internationally in the future.
                 </p>
               </div>
 
